@@ -1,0 +1,10 @@
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\Api.Model.dll.config
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\Api.Model.dll
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\Api.Model.pdb
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\EntityFramework.dll
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\EntityFramework.SqlServer.dll
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\EntityFramework.xml
+D:\Codes\SXD_Admin\Api\Api.Model\bin\Debug\EntityFramework.SqlServer.xml
+D:\Codes\SXD_Admin\Api\Api.Model\obj\Debug\Api.Model.csprojResolveAssemblyReference.cache
+D:\Codes\SXD_Admin\Api\Api.Model\obj\Debug\Api.Model.dll
+D:\Codes\SXD_Admin\Api\Api.Model\obj\Debug\Api.Model.pdb

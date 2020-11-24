@@ -1,0 +1,9 @@
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\Api.Common.dll.config
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\Api.Common.dll
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\Api.Common.pdb
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\EntityFramework.dll
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\EntityFramework.SqlServer.dll
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\EntityFramework.xml
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\EntityFramework.SqlServer.xml
+D:\Codes\SXD_Admin\Api\Api.Common\obj\Debug\Api.Common.dll
+D:\Codes\SXD_Admin\Api\Api.Common\obj\Debug\Api.Common.pdb

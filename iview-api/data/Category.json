@@ -1,0 +1,21 @@
+{"_id":1,"CategoryName":"行业资讯","Childrens":[],"Sort":1,"Group":"hyzx", "CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":2,"CategoryName":"市场分析报告","Childrens":[{"CategoryName":"境内分析报告"},{"CategoryName":"境外分析报告"}],"Sort":2,"Group":"hybg","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":3,"CategoryName":"技术研究报告","Childrens":[{"CategoryName":"中文技术报告"},{"CategoryName":"英文技术报告"}],"Sort":3,"Group":"hybg","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":4,"CategoryName":"投资分析报告","Childrens":[],"Sort":4,"Group":"hybg","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":5,"CategoryName":"政策环境报告","Childrens":[],"Sort":5,"Group":"hybg","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":6,"CategoryName":"综合分析报告","Childrens":[],"Sort":6,"Group":"hybg","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+
+{"_id":7,"CategoryName":"农林牧渔","Childrens":[],"Sort":6,"Group":"hyfl","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":8,"CategoryName":"制造业","Childrens":[{"CategoryName":"食品制造业","Sort":1},{"CategoryName":"纺织业","Sort":2},{"CategoryName":"家具制造业","Sort":3},{"CategoryName":"烟草制造业","Sort":4}],"Sort":6,"Group":"hyfl","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+{"_id":9,"CategoryName":"信息传输、软件和信息通讯行业","Childrens":[],"Sort":6,"Group":"hyfl","CreateDate":"2019-07-17","LastModified":"2019-07-17","IsValid":true},
+
+
+
+
+
+
+
+
+
+
+

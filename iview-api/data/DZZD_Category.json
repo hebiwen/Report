@@ -1,0 +1,8 @@
+[
+{_id:1,CategoryName:"行业资讯",Sort:1,Group:"hyzx",ParentId:0,SelfCode:"1"},
+{_id:2,CategoryName:"市场分析报告",Sort:2,Group:"hybg",ParentId:0,SelfCode:"2"},
+{_id:3,CategoryName:"境内分析报告",Sort:1,Group:"hybg",ParentId:2,SelfCode:"2.3"},
+{_id:4,CategoryName:"境外分析报告",Sort:2,Group:"hybg",ParentId:2,SelfCode:"2.4"},
+{_id:5,CategoryName:"境内分析报告子节点1",Sort:1,Group:"hybg",ParentId:3,SelfCode:"2.3.5"},
+{_id:6,CategoryName:"境内分析报告子节点2",Sort:2,Group:"hybg",ParentId:3,SelfCode:"2.3.6"}
+]
