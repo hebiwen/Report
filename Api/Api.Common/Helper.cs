@@ -103,7 +103,7 @@ namespace Api.Common
             return !Regex.IsMatch(value, @"[<|>|\}|\{|$|#|\*|\'|\t|\r|\n]");
         }
 
-        public static bool TextValueCheck(string Value, int MinLength, int MaxLength, string emptyMess, string tooLongMess, string invalidMess, string isExisted ,DataValidateTypes DataType, out List<string> MessageList)
+        public static bool TextValueCheck(string Value, int MinLength, int MaxLength,bool isExisted, string emptyMess, string tooLongMess, string invalidMess, string existedMess ,DataValidateTypes DataType, out List<string> MessageList)
         {
             bool result = true;
             MessageList = new List<string>();
@@ -132,6 +132,13 @@ namespace Api.Common
                     result = false;
                 }
             }
+
+            if (isExisted) {
+                mess = existedMess;
+                messList.Add(mess);
+                result = false;
+            }
+
             MessageList.AddRange(messList);
             return result;
         }

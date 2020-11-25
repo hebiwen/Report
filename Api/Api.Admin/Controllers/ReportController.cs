@@ -94,6 +94,8 @@ namespace Api.Admin.Controllers
         public IHttpActionResult SaveReport(dynamic obj)
         {
             ResultData result = new ResultData();
+            List<string> message = new List<string>();
+
             try
             {
                 string id = obj["id"];
@@ -101,7 +103,6 @@ namespace Api.Admin.Controllers
                 string reportId = obj["reportId"];
                 string file = obj["file"];
 
-                List<string> message = new List<string>();
                 resource_info report = null;
 
                 if (!TextValidation(obj, out message))
@@ -133,18 +134,17 @@ namespace Api.Admin.Controllers
                 }
 
                 int res = db.SaveChanges();
-                if (res > 0)
-                {
+                if (res > 0){
                     result = new ResultData() { code = (int)ResultCode.Successed };
                 }
-                else {
-                    result = new ResultData() { code = (int)ResultCode.Failed };
-                }
+                
                 return Json(result);
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                message.Add(ex.Message);
+                result = new ResultData() { code = (int)ResultCode.Failed, msg = message };
+                return Json(result);
             }
         }
 
@@ -182,7 +182,7 @@ namespace Api.Admin.Controllers
             string reportId = obj["reportId"];
             string file = obj["file"];
 
-            checkResult = Helper.TextValueCheck(title, 1, 32, "cannot empty", "is too long", "is invalid","is existed", DataValidateTypes.SafeCharsOnly, out errMessage);
+            checkResult = Helper.TextValueCheck(title, 1, 32,eTitle(title),"cannot empty", "is too long", "is invalid","is existed", DataValidateTypes.SafeCharsOnly, out errMessage);
             if (!checkResult)
             {
                 messageList.AddRange(errMessage);
@@ -190,6 +190,13 @@ namespace Api.Admin.Controllers
             }
 
             return result;
+        }
+
+        public bool eTitle(string title)
+        {
+            bool isExisted = false;
+            if (string.IsNullOrEmpty(title)) return isExisted;
+            return isExisted;
         }
 
         public void EditReport(dynamic obj)
