@@ -2,7 +2,7 @@ var util = {};
 
 util.defaultPwd = '123456';
 
-util.pageSize = 10;
+util.pageSize = 20;
 
 util.currDate = new Date();
 
@@ -14,7 +14,11 @@ util.isNullOrEmpty = function(obj){
     }
 }
 
-
+util.TextValueCheck = function(value){
+    var result = { status : true, message : [] };
+    
+    return result;
+}
 
 // NBA final, laker, 总冠军
 // var obj={

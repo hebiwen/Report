@@ -12,22 +12,13 @@
                         <Icon type="pinpoint"></Icon>
                         会员列表
                     </p>
-                    <Row>
-                        <Col span="3">
-                            <Tree :data="deptTree" @on-select-change="OnSelectChange" ref="treeNodes" ></Tree>
-                        </Col>
-                        <Col span="21">
-                            <Row>
-                                <Input icon="search" v-model="search" @on-change="getUserlist()" placeholder="请输入姓名搜索..." style="width:400px" />
-                                <router-link tag="Button" :to="{name:'addUser'}" class="fr ivu-btn-success margin-left-10" >添加</router-link>
-                                <Button type="primary" class="fr margin-left-10">导入</Button>
-                                <Button type="warning" class="fr" @click="exportToExcel()" >导出</Button>
-                            </Row>
-                            <Row class="margin-top-10 searchable-table-con1">
-                                <Table :columns="columns" :data="userList"></Table> 
-                                <Page :total="total" :page-size="10" :current="pageIndex" @on-change="changePage" show-total class="margin-top-8" />
-                            </Row>
-                        </Col>
+                     <Row>
+                        <Input icon="search" v-model="search" @on-change="getUserlist()" placeholder="请输入姓名搜索..." style="width:400px" />
+                        <router-link tag="Button" :to="{name:'addUser'}" class="fr ivu-btn-success margin-left-10" >添加</router-link>
+                    </Row>
+                    <Row class="margin-top-10 searchable-table-con1">
+                        <Table :columns="columns" :data="userList"></Table> 
+                        <Page :total="total" :page-size="10" :current="pageIndex" @on-change="changePage" show-total class="margin-top-8" />
                     </Row>
                 </Card>
             </Col>
@@ -108,7 +99,7 @@ import blob from '../../libs/excel/Blob.js'
 import export2Excel from '../../libs/excel/Export2Excel.js'
 
 export default {
-  name:'user',
+  name:'userList',
   data () {
     return {
       pageIndex:1,

@@ -47,7 +47,7 @@ const app = {
                     let len = menuList.push(item);
                     let childrenArr = [];
                     childrenArr = item.children.filter((child)=>{
-                        return child;
+                        if(child.hidden != true) return child;
                     });
                     // menuList[len-1].children = childrenArr;
                     if (childrenArr === undefined || childrenArr.length === 0) {

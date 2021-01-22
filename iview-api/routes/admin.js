@@ -12,6 +12,7 @@ router.get('/', function(req, res, next) {
 
 //#region 报告相关
 router.get('/reportList',report.getPageReport);
+router.get('/report',report.getReport);
 //#endregion
 
 module.exports = router;

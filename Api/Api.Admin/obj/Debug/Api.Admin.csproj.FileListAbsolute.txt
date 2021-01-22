@@ -47,3 +47,7 @@ D:\Codes\SXD_Admin\Api\Api.Admin\obj\Debug\Api.Admin.dll
 D:\Codes\SXD_Admin\Api\Api.Admin\obj\Debug\Api.Admin.pdb
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\Api.Common.dll
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\Api.Common.pdb
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\PagedList.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\PagedList.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\log4net.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\log4net.xml

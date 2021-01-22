@@ -61,30 +61,4 @@ router.afterEach((to)=>{
   window.scrollTo(0,0);
 })
 
-// export default new Router({
-//   routes: [
-//     // {
-//     //   path: '/home',
-//     //   name: 'HelloWorld',
-//     //   component: HelloWorld
-//     // },
-//     {
-//       path:'/login',
-//       name:'login',
-//       meta:{
-//         title:'Login - 登录'
-//       },
-//       component:()=> import('@/views/login.vue')
-//     },
-//     {
-//       path:'/',
-//       name:'mainRouter',
-//       redirect:'/home',
-//       component:main,
-//       children:[
-//         { path:'home',title:'主页',name:'home',component:()=>import('@/views/home/home.vue') }
-//       ]
-//     }
-//   ]
-// })
 

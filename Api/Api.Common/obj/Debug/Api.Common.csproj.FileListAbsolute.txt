@@ -7,3 +7,8 @@ D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\EntityFramework.xml
 D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\EntityFramework.SqlServer.xml
 D:\Codes\SXD_Admin\Api\Api.Common\obj\Debug\Api.Common.dll
 D:\Codes\SXD_Admin\Api\Api.Common\obj\Debug\Api.Common.pdb
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\Api.Model.dll
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\Api.Model.pdb
+D:\Codes\SXD_Admin\Api\Api.Common\obj\Debug\Api.Common.csprojResolveAssemblyReference.cache
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\log4net.dll
+D:\Codes\SXD_Admin\Api\Api.Common\bin\Debug\log4net.xml

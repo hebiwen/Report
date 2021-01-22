@@ -15,31 +15,48 @@ var dbConfig = {
     }
 }
 
-var db = {
-    executeSql : function(sql,callback){
-        new mssql.ConnectionPool(dbConfig).connect().then(pool => {
-            let ps = new mssql.PreparedStatement(pool);
-            ps.prepare(sql,err=>{
-                if(err){
-                    console.log('connect pool error:'+err);
-                    return;
-                }
-                ps.execute('',(err,result) => {
-                    if(err) return;
-                    ps.unprepare(err => {
-                        if(err) {
-                            callback(err,null);
-                            return;
-                        }
-                        callback(err,result)
-                    })
-                })
-            })
-        }).catch(err => {
-            console.log("connect to mssql error:"+err)
-        })
+mssql.on('error',err =>{
+    console.log("connect to mssql error:" + err);
+})
+
+var sql = {};
+
+let pool = null;
+async function initPool(){
+    if(pool == null){
+        pool = await new mssql.ConnectionPool(dbConfig).connect();
     }
-};
+    return pool;
+}
 
+sql.queryParams = async (sqlStr,params) => {
+    try {
+        await initPool(); //连接数据库
+        let request = pool.request();
+        request.multiple = true;
+        if(params != null){
+            for(let index in params){
+                request.input(index,params[index].sqlType,params[index].inputValue);
+            }
+        }
+        let result = await request.query(sqlStr);
+        return { status : true, data : result };
+    } catch (error) {
+        console.log(sqlStr,error);
+        return { status : false, data : error};
+    }
+}
 
-module.exports = db;
+sql.query = async (sqlStr) => {
+    try {
+        await initPool(); //连接数据库
+        let request = pool.request();
+        let result = await request.query(sqlStr);
+        return { status : true, data : result };
+    } catch (error) {
+        console.log(sqlStr,error);
+        return { status : false, data : error};
+    }
+}
+
+module.exports = sql;

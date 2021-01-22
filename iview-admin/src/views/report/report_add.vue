@@ -1,81 +1,201 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import '../../styles/image-editor.less';
-    @import '../../styles/cropper.min.css';
     @import '../../styles/simplemde.min.css';
+
+    .input-tag{ width: 80px; margin-left: 0; }
+    .CodeMirror, .CodeMirror-scroll { min-height: 200px; }
+
 </style>
 
-<!-- 添加/修改文章 -->
-<template>
+<template desc="添加报告">
   <div>
-    <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80" >
-        <FormItem label="标题：" prop="title">
-            <Input v-model="formValidate.title" class="input" placeholder="请输入标题"></Input>
-        </FormItem>
-
-        <FormItem label="分类：" prop="category">
-            <CheckboxGroup v-model="formValidate.category">
-                <Checkbox label="文学"></Checkbox>
-                <Checkbox label="历史"></Checkbox>
-                <Checkbox label="教育"></Checkbox>
-            </CheckboxGroup>
-        </FormItem>
-
-        <FormItem label="缩略图：" prop="thumb" class="image-editor" >
-          <Row :gutter="10">
+    <Card>
+    <Form ref="iReport" :model="iReport" :rules="ruleValidate" :label-width="80" >
+        <Row>
             <Col span="12">
-                <Card>
-                    <Row :gutter="10">
-                        <Col span="12" class="image-editor-con1">
-                            <div class="cropper">
-                                <img id="cropimg" :src="cpOption.imgURL" alt="">
-                            </div>
-                        </Col>
-                        <Col span="10" class="image-editor-con1">
-                            <Row type="flex" justify="center" align="middle" class="image-editor-con1-preview-con">
-                                <div id="preview1"></div>
-                            </Row>
-                            <div class="image-editor-con1-btn-con margin-top-10">
-                                <input type="file" accept="image/*" @change="handleChange" id="fileinput" class="fileinput" />
-                                <label class="filelabel" for="fileinput"><Icon type="image"></Icon>&nbsp;选择图片</label>
-                                <span><Button type="primary" icon="crop" @click="handleCrop" >裁剪</Button></span>
-                            </div>
-                        </Col>
-                    </Row>
-                </Card>
+            <FormItem label="标题:" prop="title">
+                <Input v-model="iReport.title" oninput="getInput(this)" placeholder="请输入标题"></Input>
+            </FormItem>
             </Col>
-          </Row>
+            <Col span="12">
+            <FormItem label="副标题:">
+                <Input v-model="iReport.subTitle"  placeholder="请输入副标题"></Input>
+            </FormItem>
+            </Col>
+        </Row>
+        
+        <Row>
+            <Col span="12">
+                <FormItem label="报告分类:" prop="bgfl">
+                <Select>
+                <OptionGroup v-for="(item,index) in iReport.bgfl" :key="index" :label="item.parent">
+                    <Option v-for="(dItem,dIndex) in item.children" :value="dItem.value" :key="dIndex">{{ dItem.label }}</Option>
+                </OptionGroup>
+                </Select>
+                </FormItem>
+            </Col>
+            <Col span="12">
+                <FormItem label="中图分类:">
+                    <Select>
+                      <Option value=""></Option>
+                    </Select>
+                </FormItem>
+            </Col>
+        </Row>
 
-          <!-- 
-            <img :src="formValidate.thumb" style="width:160px;height:180px" class="fl" >
-              <Upload action="/api/admin/uploadSingle" name="file" :on-success="handleSuccess" class="fl margin-left-10" >
-              <Button icon="ios-cloud-upload-outline">上传图片</Button>
-            </Upload>
-          -->
-        </FormItem>
-        <FormItem label="文件">
-            <Upload action="/api/admin/uploadArray" name="files"  :on-success="handleSuccess" multiple >
-              <Button icon="ios-cloud-upload-outline">上传文件</Button>
+        <Row>
+            <Col span="12">
+            <FormItem label="重点关注:">
+                <RadioGroup>
+                    <Radio label="每周报告"></Radio>
+                    <Radio label="月度报告"></Radio>
+                    <Radio label="季度报告"></Radio>
+                    <Radio label="年度报告"></Radio>
+                </RadioGroup>
+            </FormItem>
+            </Col>
+            <Col span="12">
+            <FormItem label="重点报告:">
+                <Switch>
+                    <span slot="open">是</span>
+                    <span slot="close">否</span>
+                </Switch>
+            </FormItem>
+            </Col>
+        </Row>
+
+        <Row>
+            <Col span="12">
+              <FormItem label="行业分类:" prop="hyfl">
+              <Tag v-for="item in iReport.hyfl" :key="item" :name="item" closable size="medium" @on-close="delCategoryTag"></Tag>
+              <Button icon="ios-plus-empty" type="success" size="small"  @click="addCategoryTag">添加行业</Button>
+              </FormItem>
+            </Col>
+            <Col span="12">
+              <FormItem label="关键词:" prop="keyword">
+              <Tag v-for="item in iReport.keywordTags" :key="item" :name="item" size="medium" closable @on-close="delKeywordTag">{{item}}</Tag>
+              <Input class="input-tag" v-if="inputVisible" v-model="inputValue" ref="saveInputTag" @on-enter="addKeywordTag" @on-blur="addKeywordTag"></Input>
+              <Button icon="ios-plus-empty" type="success" size="small" @click="showInputTag">添加关键词</Button>
+              </FormItem>
+            </Col>
+        </Row>
+        <Row>
+          <Col span="12">
+            <FormItem label="文件:">
+            <Upload ref="upload" action="http://localhost:27298/FileUpload/FileUploader" name="file" :on-success="handleSuccess" >
+              <Button icon="ios-cloud-upload-outline" type="success" size="small">上传文件</Button>
             </Upload> 
-        </FormItem>
+            </FormItem>
+          </Col>
+          <Col span="5">
+            <FormItem label="报告页数:">
+              <Input placeholder="文件上传完成后自动获取页数" readonly></Input>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row>
+          <Col span="8">
+            <FormItem label="作者:">
+              <Input placeholder="请输入作者"></Input>
+            </FormItem>
+          </Col>
+          <Col span="8">
+            <FormItem label="作者单位:">
+              <Input placeholder="请输入作者单位"></Input>
+            </FormItem>
+          </Col>
+          <Col span="8">
+            <FormItem label="信息来源:">
+              <Input placeholder="请输入信息来源"></Input>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row>
+          <Col span="8">
+            <FormItem label="语言:">
+              <RadioGroup>
+                <Radio label="中文"></Radio>
+                <Radio label="英文"></Radio>
+              </RadioGroup>
+            </FormItem>
+          </Col>
+          <Col span="8">
+            <FormItem label="国家:">
+              <Select placheolder="请选择国家">
+                <Option value=""></Option>
+              </Select>
+            </FormItem>
+          </Col>
+          <Col span="8">
+            <FormItem label="地区:">
+              <Input placeholder="请输入地区"></Input>
+            </FormItem>
+          </Col>
+        </Row>
 
-        <FormItem label="摘要">
+        <Row>
+          <Col span="16">
+            <FormItem label="摘要:">
+              <Input type="textarea" :rows="4"  placeholder="请输入摘要信息"></Input>
+            </FormItem>
+          </Col>
+          <Col span="8">
+            <FormItem label="报告级别:">
+              <RadioGroup v-model="iReport.level">
+                <Radio label="1">一级</Radio>
+                <Radio label="2">二级</Radio>
+              </RadioGroup>
+            </FormItem>
+            <FormItem label="发布日期:" prop="publishDate">
+              <DatePicker type="date" placeholder="请选择日期"></DatePicker>
+            </FormItem>
+          </Col>
+        </Row>
+
+        <FormItem label="目录:">
             <Row>
-                <Col span="12" offset="0">
+                <Col span="24" offset="0">
                 <div class="markdown-con">
-                    <Card>
-                        <textarea  id="txt_markdown_editor" style="display:none;"></textarea>                
-                    </Card>
+                  <textarea id="txt_markdown_directory"></textarea>                
                 </div>
                 </Col>
             </Row>
         </FormItem>
-        
-        <FormItem>
-            <Button type="primary" @click="addReport()">保存</Button>
-            <Button style="margin-left: 8px">取消</Button>
+
+        <FormItem label="主要内容:">
+            <Row>
+                <Col span="24" offset="0">
+                <div class="markdown-con">
+                  <textarea id="txt_markdown_content"></textarea>                
+                </div>
+                </Col>
+            </Row>
         </FormItem>
-    </Form>
+
+        <FormItem>
+          <Button type="primary" @click="addReport()">保存</Button>
+          <Button class="margin-left-10">重置</Button>
+        </FormItem>
+      </Form>
+      </Card>
+
+      <Modal v-model="divIndustryModal" title="行业分类" width="600" ok-text="确认" >
+      <Form ref="formInline"  :label-width="80" inline>
+        <Row>
+            <Col span="6">
+                <Tree :data="industryTree" @on-select-change="OnSelectChangeTags" ref="treeTags" show-checkbox multiple ></Tree>
+            </Col>
+            <Col span="2"></Col>
+            <Col span="16">
+                <FormItem label="已选行业" prop="">
+                    <div style="border:1px solid #ddd;width:320px;">
+                        <Tag closable @on-close="delIndustry()" type="dot" color="success" ></Tag>
+                    </div>
+                </FormItem>
+            </Col>
+        </Row>
+      </Form>
+    </Modal>
   </div>
 </template>
 
@@ -83,118 +203,101 @@
 
 import util from '@/libs/util'
 import SimpleMDE from 'simplemde'
-import Cropper from 'cropperjs';
+import bgfl from './dict/bgfl'
+import hyfl from './dict/hyfl'
 
 export default {
-  name:'addReport',
+  name:'reportAdd',
   data () {
     return {
-        uploadList: [],
-        cropper:'',
-        cpOption:{
-          showCropedImage:false,
-          cropedImg:'',
-          imgURL:'', // 选择图片的文件路径
-          imgName:'', // 缩虐图的文件名aa.jpg
-        },
-        
-        simpleMDE:'', // 富文本内容
-        formValidate:{
+        divIndustryModal:false,                         // 行业分类弹出框
+        industryTree:hyfl,                              // 行业分类JSON
+        inputVisible:false,                             // 关键词的输入框默认隐藏
+        inputValue:'',                                  // 关键词的输入值
+        simpleMDE_Directory:'',                         // 目录的富文本
+        simpleMDE_Content:'',                           // 内容的富文本
+        iReport:{
           title:'',
-          fileName:[],
-          thumb:'',
-          category:[]
+          subTitle:'',
+          fileName:'',
+          bgfl:bgfl,
+          hyfl:[],
+          keywordTags:[],
+          level:''
         },
         ruleValidate:{
-          title:[{ required:true,message:'标题不能为空',trigger:'blur' }]
+          title:[{ required:true,message:'请填写标题',trigger:'blur' }],
+          hyfl:[{ required:true,message:'请添加行业分类' }],
+          keyword:[{ required:true,message:'请添加关键词' }],
+          bgfl:[{ required:true,message:'请选择报告分类' }],
+          publishDate:[{ required:true,message:'请选择发布日期' }]
         }
     }
   },
+  components:{ bgfl,hyfl },
   methods:{
     addReport(){
-      this.$refs['formValidate'].validate(valid=>{
+      this.$refs['iReport'].validate(valid=>{
           if(!valid){
-              this.$Message.error('保存失败，请检查后重新提交.');
+              this.$Modal.error({ title:'提示',content:'<p>保存失败，请检查后重新提交.</p>'});
               return;
           }
 
         let query = new URLSearchParams();
-        query.append('title',this.formValidate.title);
-        query.append('category',this.formValidate.category);
-        query.append('thumb',this.formValidate.thumb);
-        query.append('fileName',this.formValidate.fileName);
-        query.append('content',this.simpleMDE.value());
+        query.append('title',this.iReport.title);
+        query.append('bgfl',this.iReport.bgfl);
+        query.append('thumb',this.iReport.thumb);
+        query.append('fileName',this.iReport.fileName);
+        query.append('content',this.simpleMDE_Content.value());
 
         this.$http.post('/api/admin/addReport',query).then(result => {
             if(!result){
-                this.$Message.error({ content:result.message,duration:10 });
+                this.$Modal.error({ title:'提示', content:result.message, duration:10 });
                 return;
             }
-            this.$Message.success({ content:'保存成功',duration:3 });
-            this.$refs['formValidate'].resetFields();
+            this.$Modal.success({ title:'提示', content:'保存成功',duration:3 });
+            this.$refs['iReport'].resetFields();
         })
 
       })
     },
-    // iview-upload上传
-    handleSuccess (res, file) {
-        if(res && !util.isNullOrEmpty(res.fileName)){
-          this.formValidate.fileName.push("/api" + res.fileName);
-        }
+    addCategoryTag(){
+      this.divIndustryModal = true;
     },
-    // 1、选择图片 2、裁剪 3、压缩 4、上传
-    handleChange(e){
-      let file = e.target.files[0];
-        this.cpOption.imgName = file.name;
-        let reader = new FileReader();
-        reader.onload = () => {
-          this.cropper.replace(reader.result);
-        };
-        reader.readAsDataURL(file);
+    showInputTag(){
+      this.inputVisible = true;
+      this.$nextTick(()=>{
+        this.$refs.saveInputTag.$refs.input.focus();
+      })
     },
-    // getObjectURL(file){
-    //     var url = null;
-    //     if(window.createObjectURL!=undefined){
-    //         url = window.createObjectURL(file)
-    //     }else if(window.URL!=undefined){
-    //         url = window.URL.createObjectURL(file)
-    //     }else if(window.webkitURL!=undefined){
-    //         url = window.webkitURL.createObjectURL(file)
-    //     }
-    //     return url;
-    // },
-    handleCrop(){
-        let canvas = this.cropper.getCroppedCanvas();
-        let dataFile = util.dataURLtoFile(canvas.toDataURL(),this.cpOption.imgName);
-        var formData = new FormData();
-        formData.append('file',dataFile);
-        this.$http.post('/api/index/uploadSingle',formData).then(result => {
-            if(!result){
-                this.$Message.error({ content:'图片上传失败',duration:3 });
-                return false;
-            }
-            this.formValidate.thumb = '/api' + result;
-        })
-    }
+    addKeywordTag(){
+      let inputValue = this.inputValue;
+      if(inputValue) this.iReport.keywordTags.push(inputValue);
+      this.inputVisible = false;
+      this.inputValue = '';
+    },
+    delKeywordTag(event,name){
+      const index = this.iReport.keywordTags.indexOf(name);
+      this.iReport.keywordTags.splice(index,1);
+    },
+    OnSelectChangeTags(){},
+    handleSuccess(){},
+    delIndustry(){},
+    delCategoryTag(){}
+
   },
   mounted(){
-    let img = document.getElementById('cropimg');
-    this.cropper = new Cropper(img, {
-      dragMode: 'move',
-      preview: '#preview1',
-      restore: false,
-      center: false,
-      highlight: false,
-      cropBoxMovable: false,
-      toggleDragModeOnDblclick: false,
-      aspectRatio:6/8, // 设置裁剪框尺寸（宽：6 高：8）
-      // width:90,
-      // height:120
-    });
-    this.simpleMDE = new SimpleMDE({
-        element: document.getElementById('txt_markdown_editor'),
-        placeholder:'请填写文章内容',
+    this.simpleMDE_Directory = new SimpleMDE({
+        element: document.getElementById('txt_markdown_directory'),
+        // autoDownloadFontAwesome:false,       // 自动下载FontAwesome,国内下载非常慢，所以要手动安装npm install fontawesome
+        placeholder:'请输入报告目录',
         toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'clean-block', '|', 'link', 'image', 'table', 'horizontal-rule', '|', 'preview']
+    })
+    this.simpleMDE_Content = new SimpleMDE({
+        element: document.getElementById('txt_markdown_content'),
+        // autoDownloadFontAwesome:false,       // 自动下载FontAwesome,国内下载非常慢，所以要手动安装npm install fontawesome
+        placeholder:'请输入报告内容',
+        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'clean-block', '|', 'link', 'image', 'horizontal-rule', '|', 'preview']
     })
   }
 }

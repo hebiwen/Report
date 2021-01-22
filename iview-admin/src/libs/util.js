@@ -3,9 +3,13 @@ import env from '../../build/env';
 import semver from 'semver';
 import packjson from '../../package.json';
 
-let util = {
+let util = {};
 
-};
+util.infoTitle = '提示'
+util.errorTitle = '错误'
+util.warnTitle = '警告'
+util.confirmTitle = '确认'
+
 util.title = function (title, vm) {
     let iTitle = '行业报告';
     if (title) {

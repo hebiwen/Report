@@ -10,8 +10,10 @@ import store from './store'
 import 'iview/dist/styles/iview.css'; 
 
 import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:8001'  // 设置默认api地址可以解决不能调用WEBAPI的问题
+axios.defaults.baseURL = 'http://localhost:27298'  // 设置默认api地址可以解决不能调用WEBAPI的问题
+//axios.defaults.baseURL = 'http://localhost:8001'
 axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
+// axios.defaults.headers['Content-Type'] = 'application/json'
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios

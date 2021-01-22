@@ -43,5 +43,7 @@ namespace Api.Model
         public Guid x_manager { get; set; }
         public bool is_main { get; set; }
         public string bj { get; set; }
+
+        public int? old { get; set; }
     }
 }

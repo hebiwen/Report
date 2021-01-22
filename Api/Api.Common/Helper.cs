@@ -103,7 +103,21 @@ namespace Api.Common
             return !Regex.IsMatch(value, @"[<|>|\}|\{|$|#|\*|\'|\t|\r|\n]");
         }
 
-        public static bool TextValueCheck(string Value, int MinLength, int MaxLength,bool isExisted, string emptyMess, string tooLongMess, string invalidMess, string existedMess ,DataValidateTypes DataType, out List<string> MessageList)
+
+        /// <summary>
+        /// 检查输入文本有效性
+        /// </summary>
+        /// <param name="Value">输入值</param>
+        /// <param name="MinLength">最小长度</param>
+        /// <param name="MaxLength">最大长度</param>
+        /// <param name="emptyMess">字段为空提示</param>
+        /// <param name="tooLongMess">字段长度提示</param>
+        /// <param name="illegaldMess">字段非法提示</param>
+        /// <param name="expriedMess">字段超过有效期</param>
+        /// <param name="DataType">字段类型</param>
+        /// <param name="MessageList">输出提示消息集合</param>
+        /// <returns></returns>
+        public static bool TextValueCheck(string Value, int MinLength, int MaxLength, string emptyMess, string tooLongMess, string illegaMess, string expriedMess, DataValidateTypes DataType, out List<string> MessageList)
         {
             bool result = true;
             MessageList = new List<string>();
@@ -127,13 +141,86 @@ namespace Api.Common
             {
                 if (!CheckValue(DataType, Value))
                 {
-                    mess = invalidMess;
+                    mess = illegaMess;
                     messList.Add(mess);
                     result = false;
                 }
+
+                if (!string.IsNullOrEmpty(expriedMess))
+                {
+                    DateTime dtNow = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
+                    DateTime dtValue = DateTime.Parse(Value);
+                    if (dtValue < dtNow) {
+                        mess = expriedMess;
+                        messList.Add(mess);
+                        result = false;
+                    }
+                }
             }
 
-            if (isExisted) {
+            MessageList.AddRange(messList);
+            return result;
+        }
+
+        /// <summary>
+        /// 检查输入文本有效性
+        /// </summary>
+        /// <param name="Value">输入值</param>
+        /// <param name="MinLength">最小长度</param>
+        /// <param name="MaxLength">最大长度</param>
+        /// <param name="isExisted">是否已存在</param>
+        /// <param name="emptyMess">字段为空提示</param>
+        /// <param name="tooLongMess">字段太长提示</param>
+        /// <param name="illegaMess">字段非法提示</param>
+        /// <param name="expriedMess">字段超过有效期</param>
+        /// <param name="existedMess">已存在提示</param>
+        /// <param name="DataType">字段类型</param>
+        /// <param name="MessageList">输出提示消息集合</param>
+        /// <returns></returns>
+        public static bool TextValueCheck(string Value, int MinLength, int MaxLength, bool isExisted, string emptyMess, string tooLongMess, string illegaMess, string expriedMess, string existedMess, DataValidateTypes DataType, out List<string> MessageList)
+        {
+            bool result = true;
+            MessageList = new List<string>();
+            List<string> messList = new List<string>();
+            string mess = string.Empty;
+
+            if (Value.Length == 0 && MinLength > 0)
+            {
+                mess = emptyMess;
+                messList.Add(mess);
+                result = false;
+            }
+            if (Value.Length > MaxLength)
+            {
+                mess = tooLongMess;
+                messList.Add(mess);
+                result = false;
+            }
+
+            if (Value.Length > 0 && MinLength >= 0)
+            {
+                if (!CheckValue(DataType, Value))
+                {
+                    mess = illegaMess;
+                    messList.Add(mess);
+                    result = false;
+                }
+
+                if (!string.IsNullOrEmpty(expriedMess))
+                {
+                    DateTime dtNow = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
+                    DateTime dtValue = DateTime.Parse(Value);
+                    if (dtValue < dtNow)
+                    {
+                        mess = expriedMess;
+                        messList.Add(mess);
+                        result = false;
+                    }
+                }
+            }
+
+            if (isExisted)
+            {
                 mess = existedMess;
                 messList.Add(mess);
                 result = false;
@@ -142,7 +229,6 @@ namespace Api.Common
             MessageList.AddRange(messList);
             return result;
         }
-
 
         public static bool CheckValue(DataValidateTypes validateType, string value)
         {
