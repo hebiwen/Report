@@ -14,11 +14,8 @@ using Newtonsoft.Json.Linq;
 
 namespace Api.Admin.Controllers
 {
-    public class ReportController : ApiController
+    public class ReportController : BaseController
     {
-        public DbEntities db = new DbEntities();
-        public int pageSize = 20; // 调用global中的全局变量
-
         /// <summary>
         /// 获取报告分页列表
         /// </summary>
@@ -46,7 +43,7 @@ namespace Api.Admin.Controllers
                                  bgflName = e.Value,
                                  status = c.Status,
                                  statusName = d.Value,
-                                 publishDate = c.PublishDate
+                                 publishDate = c.PublishDate.Value.ToString("yyyy-MM-dd")
                              }).AsEnumerable();
                 var dItems = query.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();    
 
@@ -121,7 +118,7 @@ namespace Api.Admin.Controllers
                     var iResult = new { data = report, statusName = ApiEnum.TransferReportStatus(report.Status) };
                     result = new ResultData {
                         code = (int)ResultCode.Successed,
-                        msg = ApiEnum.TransferResultCode((int)ResultCode.Successed),
+                        msg = ApiEnum.TransferResultCode(ResultCode.Successed),
                         data = JsonConvert.SerializeObject(iResult)
                     };
                 }
@@ -191,13 +188,42 @@ namespace Api.Admin.Controllers
 
         public void CreateReport(HttpContext context)
         {
-            string id = context.Request["id"];
-            string title = context.Request["title"];
+            try
+            {
+                RP_Report report = new RP_Report(){
+                    Title = context.Request["title"],
+                    SubTitle = context.Request["subTitle"],
+                    bgfl = Helper.ConvertInt32(context.Request["bgfl"]),
+                    ztfl = context.Request["ztfl"],
+                    KeyWords = context.Request["keyword"],
+                    Abstract = context.Request["abstract"],
+                    Directory = context.Request["directory"],
+                    Content = context.Request["content"],
+                    Status = (int)ReportStatus.NotAudit,
+                    FileName = context.Request["fileName"],
+                    FilePath = context.Request["filePath"],
+                    FilePage = Helper.ConvertInt32(context.Request["filePage"]),
+                    zdgzfl = context.Request["zdgz"],
+                    hyfl = context.Request["hyfl"],
+                    Level = Helper.ConvertInt32(context.Request["level"]),
+                    Author = context.Request["author"],
+                    Company = context.Request["company"],
+                    Source = context.Request["source"],
+                    Language = context.Request["language"],
+                    Country = context.Request["country"],
+                    Area = context.Request["area"],
+                    IsMain = Helper.ConvertBoolen(context.Request["zdbg"]),
+                    PublishDate = Helper.ConvertDateTime(context.Request["publishDate"]),
+                    CreateBy = "Session",
+                    CreateDate = DateTime.Now,
+                };
 
-            resource_info report = new resource_info();
-            report.x_title = title;
-
-            db.resource_info.Add(report);
+                db.Report.Add(report);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         /// <summary>
@@ -219,7 +245,7 @@ namespace Api.Admin.Controllers
                 db.resource_info.RemoveRange(reports);
                 int res = db.SaveChanges();
                 if (res > 0) {
-                    result = new ResultData() { code = (int)ResultCode.Successed, msg = ApiEnum.TransferResultCode((int)ResultCode.Successed) };
+                    result = new ResultData() { code = (int)ResultCode.Successed, msg = ApiEnum.TransferResultCode(ResultCode.Successed) };
                 }
             }
             catch (Exception ex)
@@ -230,7 +256,12 @@ namespace Api.Admin.Controllers
             return Json<ResultData>(result);
         }
 
-
+        /// <summary>
+        /// 表单验证
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="messageList"></param>
+        /// <returns></returns>
         public bool TextValidation(HttpContext context, out List<string> messageList)
         {
             bool result = true;
@@ -238,14 +269,18 @@ namespace Api.Admin.Controllers
             messageList = new List<string>();
             List<string> errMessage = new List<string>();
 
-            string title = context.Request["title"];
+            string title = context.Request["title"].Trim();
+            string bgfl = context.Request["bgfl"].Trim();
+            string hyfl = context.Request["hyfl"].Trim();
+            string keyword = context.Request["keyword"].Trim();
 
-            checkResult = Helper.TextValueCheck(title, 1, 32, eTitle(title), "cannot empty", "is too long", "is illeagl", string.Empty, "is existed", DataValidateTypes.SafeCharsOnly, out errMessage);
+            checkResult = Helper.TextValueCheck(title, 1, 32, eTitle(title), "标题不能为空.", "标题最大长度是32.", "标题无效.", string.Empty, "标题已存在.", DataValidateTypes.SafeCharsOnly, out errMessage);
             if (!checkResult)
             {
                 messageList.AddRange(errMessage);
                 result = checkResult;
             }
+            checkResult = Helper.TextValueCheck(bgfl, 1, 32, "报告分类不能为空.", "报告分类最大长度为32.", "报告分类无效.", string.Empty, DataValidateTypes.Integer, out errMessage);
 
             return result;
         }
@@ -258,21 +293,66 @@ namespace Api.Admin.Controllers
         }
 
         /// <summary>
-        /// 返回自定义Json结果
+        /// 获取分类JSON数据
         /// </summary>
-        /// <param name="Code">状态码 (默认:0)</param>
-        /// <param name="Message">消息</param>
+        /// <param name="type">分类类型</param>
         /// <returns></returns>
-        public IHttpActionResult ErrorResult(ResultCode Code = ResultCode.Successed, string Message = "")
+        [HttpGet]
+        public IHttpActionResult GetCategory(int type)
         {
-            ResultData result = new ResultData()
+            ResultData result = new ResultData();
+            try
             {
-                code = (int)Code,
-                msg = Message
-            };
+                var lstCategory = db.Category.Where(en => en.type == type && en.parentId == null).OrderBy(en => en.sort).ToList();
+                if (lstCategory.Count == 0) return ErrorResult(ResultCode.Successed, "暂无数据.");
+
+                List<CategoryTree> lstCategoryTree = new List<CategoryTree>();
+                lstCategory.ForEach(item => {
+                    var child = new CategoryTree();
+                    child.id = item.id;
+                    child.title = item.title;
+                    child.parentId = item.parentId;
+                    child.parentName = item.parentName;
+                    child.sort = item.sort;
+                    var childCategory = GetChildCategory(child, item.id);
+                    if (childCategory == null)
+                    {
+                        lstCategoryTree.Add(child);
+                    }
+                    else {
+                        lstCategoryTree.Add(childCategory);
+                    }
+                });
+
+                result.data = JsonConvert.SerializeObject(lstCategoryTree);
+            }
+            catch (Exception ex)
+            {
+                result = new ResultData { code = (int)ResultCode.Faild, msg = ex.Message };
+            }
             return Json(result);
         }
 
+        public CategoryTree GetChildCategory(CategoryTree category,int? parentId)
+        {
+            var childCategory = db.Category.Where(en => en.parentId == parentId).OrderBy(en => en.sort).ToList();
+            if (childCategory.Count == 0) return null;
+            List<CategoryTree> lstCategory = new List<CategoryTree>();
+            childCategory.ForEach(child =>
+            {
+                var nCategory = new CategoryTree() {
+                    id = child.id,
+                    title = child.title,
+                    parentId = child.parentId,
+                    parentName = child.parentName,
+                    sort = child.sort
+                };
+                GetChildCategory(nCategory, child.id);
+                lstCategory.Add(nCategory);
+            });
+            if(lstCategory != null) category.children = lstCategory;
+            return category;
+        }
 
 
         #region The Old Version Code
@@ -373,5 +453,19 @@ namespace Api.Admin.Controllers
         public DateTime PublishDate { get; set; }
     }
 
-
+    /// <summary>
+    /// 分类树
+    /// </summary>
+    public class CategoryTree
+    {
+        public int id { get; set; }
+        public string title { get; set; }
+        public int? parentId { get; set; }
+        public string parentName { get; set; }
+        public string sort { get; set; }
+        /// <summary>
+        /// 子节点
+        /// </summary>
+        public List<CategoryTree> children { get; set; }
+    }
 }

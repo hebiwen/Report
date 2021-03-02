@@ -8,11 +8,12 @@ using System.Web.Http;
 
 namespace Api.Admin.Controllers
 {
-    public class TestController : ApiController
+    public class TestController : BaseController
     {
+        [HttpGet]
         public async Task<IHttpActionResult> Test()
         {
-            return Json<dynamic>(await Task.Run(() => new { code = 1, msg = "" }));
+            return Json<dynamic>(await Task.Run(() => new { code = 1, msg = "failed" }));
         }
         
 

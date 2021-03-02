@@ -53,12 +53,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\DbEntities.cs" />
+    <Compile Include="Entity\RP_Category.cs" />
     <Compile Include="Entity\dict_industry_category.cs" />
     <Compile Include="Entity\dict_report_category.cs" />
     <Compile Include="Entity\dict_zhongtu_category.cs" />
-    <Compile Include="Entity\Directory.cs" />
+    <Compile Include="Entity\RP_Directory.cs" />
     <Compile Include="Entity\rel_resource_industry.cs" />
-    <Compile Include="Entity\Report.cs" />
+    <Compile Include="Entity\RP_Report.cs" />
     <Compile Include="Entity\resource_info.cs" />
     <Compile Include="Entity\sys_user.cs" />
     <Compile Include="Enum\ApiEnum.cs" />

@@ -22,7 +22,7 @@ namespace Api.Admin.Controllers
                     var iReport = db.resource_info.Where(en => en.old == 0).Take(100).ToList();
                     iReport.ForEach(item =>
                     {
-                        Report rpt = new Report();
+                        RP_Report rpt = new RP_Report();
                         rpt.Title = CheckLength(item.x_title, 200);
                         rpt.SubTitle = CheckLength(item.x_subtitle, 200);
                         rpt.WebTitle = CheckLength(item.x_webtitle, 2000);
@@ -32,7 +32,7 @@ namespace Api.Admin.Controllers
                         rpt.Content = CheckLength(item.x_content, 4000);
                         rpt.Status = ConvertStatus(item.x_verifystate);
                         rpt.FileName = CheckLength(item.x_file, 100);
-                        rpt.Pages = item.x_page;
+                        rpt.FilePage = item.x_page;
                         rpt.bgfl = ConvertBgfl(item.x_reportId);
                         rpt.ztfl = ConvertZtfl(item.x_zhongtuId);
                         rpt.zdgzfl = ConvertZdgz(item.x_watchId);
@@ -127,15 +127,15 @@ namespace Api.Admin.Controllers
             return result;
         }
 
-        public int? ConvertZdgz(Guid zdgz)
+        public string ConvertZdgz(Guid zdgz)
         {
-            int? result = null;
+            string result = string.Empty;
             switch (zdgz.ToString().ToUpper())
             {
-                case "9BB4CC1D-4C1A-402B-8184-27FB5DE1AB82": result = 1;break;
-                case "09BC7E4A-1BBB-463B-8723-D2C8C07C12C8": result = 2; break;
-                case "889B183C-EF3A-40FA-A40A-CFA5290ACF85": result = 3; break;
-                case "3F65D62A-8F03-407B-83F4-6755144C269D": result = 4; break;
+                case "9BB4CC1D-4C1A-402B-8184-27FB5DE1AB82": result = "每周报告"; break;
+                case "09BC7E4A-1BBB-463B-8723-D2C8C07C12C8": result = "月度报告"; break;
+                case "889B183C-EF3A-40FA-A40A-CFA5290ACF85": result = "季度报告"; break;
+                case "3F65D62A-8F03-407B-83F4-6755144C269D": result = "年度报告"; break;
                 default:result = null;break;
             }
             return result;

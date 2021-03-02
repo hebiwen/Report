@@ -313,4 +313,23 @@ util.isNullOrEmpty = function(obj){
     }
 }
 
+util.getCategory = async function(type){
+    // let obj = [];
+    // await axios.get('/Api/Report/GetCategory',{ params: { type:type } }).then(result=>{
+    //     if(result.data.code == 0){
+    //         obj = JSON.stringify(result.data.data);
+    //     }
+    // })
+    // return obj;
+
+    try {
+        const result = await axios.get('/Api/Report/GetCategory',{ params:{ type:type } });
+        //return JSON.parse(result.data.data);
+        return "dd";
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
 export default util;

@@ -151,10 +151,28 @@
             },
             handleSubmenuChange(val){ console.log(val); },
             beforePush(name){return true;},
-            scrollBarResize(){}
+            scrollBarResize(){},
+            initCategory(){
+                if(util.isNullOrEmpty(localStorage.bgflArray)){
+                    this.$http.get('/Api/Report/GetCategory',{ params:{ type:1 } }).then(result=>{
+                        localStorage.bgflArray = result.data.data;
+                    })
+                }
+                if(util.isNullOrEmpty(localStorage.hyflArray)){
+                    this.$http.get('/Api/Report/GetCategory',{ params:{ type:2 } }).then(result=>{
+                        localStorage.hyflArray = result.data.data;
+                    })
+                }
+                if(util.isNullOrEmpty(localStorage.ztflArray)){
+                    this.$http.get('/Api/Report/GetCategory',{ params:{ type:3 } }).then(result=>{
+                        localStorage.ztflArray = result.data.data;
+                    })
+                }
+            }
         },
         mounted(){
             this.init();
+            this.initCategory();
         },
         created(){
             this.$store.commit('setOpenedList');

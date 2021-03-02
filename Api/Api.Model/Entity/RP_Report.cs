@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Api.Model
 { 
     [Table("RP_Report")]
-    public class Report
+    public class RP_Report
     {
         [Key]
         public int id { get; set; }
@@ -22,9 +22,10 @@ namespace Api.Model
         public string Content { get; set; }
         public int? Status { get; set; }
         public string FileName { get; set; }
-        public int? Pages { get; set; }
+        public string FilePath { get; set; }
+        public int? FilePage { get; set; }
         public int? bgfl { get; set; }
-        public int? zdgzfl { get; set; }
+        public string zdgzfl { get; set; }
         public string ztfl { get; set; }
         /// <summary>
         /// 多个行业以逗号隔开

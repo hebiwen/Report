@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Api.Model
 {
     [Table("RP_Directory")]
-    public class Directory
+    public class RP_Directory
     {
         [Key]
         public int id { get; set; }

@@ -11,10 +11,8 @@ using Newtonsoft.Json;
 
 namespace Api.Admin.Controllers
 {
-    public class DirectoryController : ApiController
+    public class DirectoryController : BaseController
     {
-        public DbEntities db = new DbEntities();
-        public const int pageSize = 20;
         [HttpGet]
         public async Task<IHttpActionResult> GetPageDirectory(int pageIndex)
         {

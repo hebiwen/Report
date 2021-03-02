@@ -26,9 +26,11 @@ namespace Api.Model
         #endregion
 
         #region NewEntites
-        public DbSet<Report> Report { get; set; }
+        public DbSet<RP_Report> Report { get; set; }
 
-        public DbSet<Directory> Directory { get; set; }
+        public DbSet<RP_Directory> Directory { get; set; }
+
+        public DbSet<RP_Category> Category { get; set; }
         #endregion
 
         #region VEntities
