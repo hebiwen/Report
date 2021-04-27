@@ -59,6 +59,7 @@
     <Compile Include="Entity\dict_zhongtu_category.cs" />
     <Compile Include="Entity\RP_Directory.cs" />
     <Compile Include="Entity\rel_resource_industry.cs" />
+    <Compile Include="Entity\RP_DZReport.cs" />
     <Compile Include="Entity\RP_Report.cs" />
     <Compile Include="Entity\resource_info.cs" />
     <Compile Include="Entity\sys_user.cs" />

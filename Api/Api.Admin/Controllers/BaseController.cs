@@ -13,7 +13,7 @@ namespace Api.Admin.Controllers
 {
     public class BaseController : ApiController
     {
-        public const int pageSize = 30;  //设置全局变量
+        public int pageSize = 30;  //设置全局变量
 
         public DbEntities db = new DbEntities();
         protected override void Initialize(HttpControllerContext controllerContext)
@@ -37,6 +37,7 @@ namespace Api.Admin.Controllers
             };
         }
 
+
         /// <summary>
         /// 返回自定义Json结果
         /// </summary>
@@ -51,6 +52,79 @@ namespace Api.Admin.Controllers
                 msg = Message
             };
             return Json(result);
+        }
+
+        /// <summary>
+        /// 字符串转换成数字
+        /// </summary>
+        /// <param name="value">输入值</param>
+        /// <returns></returns>
+        public static int? ConvertInt32(string value)
+        {
+            int? result = null;
+            if (!string.IsNullOrEmpty(value.Trim()) && value != "null" && value != "undefined")
+            {
+                result = Convert.ToInt32(value);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 字符串转换成小数
+        /// </summary>
+        /// <param name="value">输入值</param>
+        /// <returns></returns>
+        public static decimal? ConvertDecimal(string value)
+        {
+            decimal? result = null;
+            if (!string.IsNullOrEmpty(value.Trim()) && value != "null" && value != "undefined")
+            {
+                result = Convert.ToDecimal(value);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 字符串转换成日期
+        /// </summary>
+        /// <param name="value">输入值</param>
+        /// <returns></returns>
+        public static DateTime? ConvertDateTime(string value)
+        {
+            DateTime result = DateTime.Now;
+            if (DateTime.TryParse(value, out result))
+            {
+                return result;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 字符串转换成布尔值
+        /// </summary>
+        /// <param name="value">输入值</param>
+        /// <returns></returns>
+        public static bool ConvertBoolen(string value)
+        {
+            bool result = true;
+            if (Boolean.TryParse(value, out result))
+            {
+                return result;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 小数格式化成字符串
+        /// </summary>
+        /// <param name="value">输入值</param>
+        /// <param name="format">保留小数位</param>
+        /// <returns></returns>
+        public static string FormatDecimal(decimal? value, string format)
+        {
+            if (value.HasValue)
+            {
+                return Convert.ToDecimal(value).ToString(format);
+            }
+            return null;
         }
     }
 }

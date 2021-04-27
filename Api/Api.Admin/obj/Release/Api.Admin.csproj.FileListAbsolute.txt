@@ -47,3 +47,7 @@ D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Http.WebHost.xml
 D:\Codes\SXD_Admin\Api\Api.Admin\obj\Release\Api.Admin.csprojResolveAssemblyReference.cache
 D:\Codes\SXD_Admin\Api\Api.Admin\obj\Release\Api.Admin.dll
 D:\Codes\SXD_Admin\Api\Api.Admin\obj\Release\Api.Admin.pdb
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\log4net.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\PagedList.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\log4net.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\PagedList.xml

@@ -18,9 +18,9 @@
             </FormItem>
             </Col>
             <Col span="12">
-            <FormItem label="报告分类:">
-                <Select>
-                    <Option value=""></Option>
+            <FormItem label="报告分类:" prop="category">
+                <Select v-model="iReport.category" clearable placeholder="请选择分类" style="width:200px">
+                    <Option v-for="item in lstCategory" :key="item.id" :value="item.id">{{item.name}}</Option>
                 </Select>
             </FormItem>
             </Col>
@@ -28,13 +28,13 @@
         
         <Row>
             <Col span="12">
-              <FormItem label="行业分类:" prop="hyfl">
-              <Tag v-for="item in iReport.hyfl" :key="item" :name="item" closable size="medium" @on-close="delCategoryTag"></Tag>
-              <Button icon="ios-plus-empty" type="success" size="small"  @click="addCategoryTag">添加行业</Button>
+              <FormItem label="行业分类:">
+              <Tag v-for="item in iReport.hyfl" :key="item.id" :name="item.title" closable size="medium" @on-close="delSelectedTag">{{item.title}}</Tag>
+              <Button icon="ios-add" type="success" size="small"  @click="addCategoryTag">添加行业</Button>
               </FormItem>
             </Col>
             <Col span="12">
-              <FormItem label="报告来源:" prop="keyword">
+              <FormItem label="报告来源:">
                 <Input placeholder="请输入报告来源"></Input>
               </FormItem>
             </Col>
@@ -42,50 +42,43 @@
         <Row>
           <Col span="12">
             <FormItem label="文件:">
-            <Upload ref="upload" action="" name="files" :on-success="handleSuccess" >
+            <Upload ref="upload" action="#" :format="['pdf']" :on-format-error="handleFormatError" :before-upload="handleBefore" >
               <Button icon="ios-cloud-upload-outline" type="success" size="small">上传文件</Button>
             </Upload> 
+            <div v-if="iReport.fileName!=''">已上传:{{ iReport.fileName }}</div> 
             </FormItem>
           </Col>
-          <Col span="5">
-            <FormItem label="报告页数:">
-              <Input placeholder="文件上传完成后自动获取页数" readonly></Input>
-            </FormItem>
-          </Col>
-        </Row>
-        <Row>
           <Col span="12">
             <FormItem label="缩略图:">
-            <Upload ref="upload" action="" name="files" :on-success="handleSuccess" >
+            <Upload ref="upload" action="#" :format="['jpg','png','jepg']" :on-format-error="handleFormatError" :before-upload="handleBefore" >
               <Button icon="ios-cloud-upload-outline" type="success" size="small">上传文件</Button>
             </Upload> 
             </FormItem>
           </Col>
         </Row>
         <Row>
-          <Col span="8">
+          <Col span="6">
             <FormItem label="单价:">
-              <Input placeholder="请输入单价">
-              <span slot="append">元/页</span>
-              </Input>
+              <InputNumber v-model="iReport.price" :min="0" placeholder="请输入单价">
+              </InputNumber>
             </FormItem>
           </Col>
-          <Col span="8">
+          <Col span="6">
             <FormItem label="可预览页数:">
-              <InputNumber :min="0" placeholder="可预览页数"></InputNumber>
+              <InputNumber v-model="iReport.previewPage" :min="0" placeholder="可预览页数"></InputNumber>
             </FormItem>
           </Col>
-          <Col span="8">
-            <FormItem label="序号:">
-              <InputNumber :min="1" placeholder="序号"></InputNumber>
+          <Col span="6">
+            <FormItem label="报告页数:">
+              <Input v-model="iReport.FilePage" placeholder="报告页数" readonly style="width:78px"></Input>
             </FormItem>
           </Col>
         </Row>
         
         <Row>
           <Col span="16">
-            <FormItem label="摘要:">
-              <Input type="textarea" :rows="4"  placeholder="请输入摘要信息"></Input>
+            <FormItem label="报告摘要:">
+              <Input v-model="iReport.description" type="textarea" :rows="6"  placeholder="请输入摘要信息"></Input>
             </FormItem>
           </Col>
         </Row>
@@ -97,17 +90,18 @@
       </Form>
       </Card>
 
-    <Modal v-model="divIndustryModal" title="行业分类" width="600" ok-text="确认" >
+    <Modal v-model="divIndustryModal" title="行业分类" width="800" ok-text="确认" >
       <Form ref="formInline"  :label-width="80" inline>
         <Row>
-            <Col span="6">
-                <Tree :data="industryTree" @on-select-change="OnSelectChangeTags" ref="treeTags" show-checkbox multiple ></Tree>
+            <Col span="10">
+                <!-- <Tree :data="hyflArray" @on-select-change="onSelectNode" @on-check-change="onSelectNode" ref="treeTags" show-checkbox multiple ></Tree> -->
+                <el-tree :data="hyflArray" :props="props" show-checkbox highlight-current node-key="id" ref="treeTags" @check="treeCheck"></el-tree>
             </Col>
             <Col span="2"></Col>
-            <Col span="16">
-                <FormItem label="已选行业" prop="">
-                    <div style="border:1px solid #ddd;width:320px;">
-                        <Tag closable @on-close="delIndustry()" type="dot" color="success" ></Tag>
+            <Col span="12">
+                <FormItem label="已选行业:">
+                    <div style="border:1px solid #ddd;width:320px;min-height:30px;">
+                        <Tag v-if="iReport.hyfl.length > 0" v-for="item,index in iReport.hyfl" :key="index" :name="item.title" closable @on-close="delSelectedTag" type="dot" color="success" >{{ item.title }}</Tag>
                     </div>
                 </FormItem>
             </Col>
@@ -120,40 +114,66 @@
 <script>
 
 import util from '@/libs/util'
-import SimpleMDE from 'simplemde'
-import bgfl from './dict/bgfl'
-import hyfl from './dict/hyfl'
 
 export default {
-  name:'reportAdd',
+  name:'dzbgAdd',
   data () {
     return {
-        divIndustryModal:false,                         // 行业分类弹出框
-        industryTree:hyfl,                              // 行业分类JSON
-        inputVisible:false,                             // 关键词的输入框默认隐藏
-        inputValue:'',                                  // 关键词的输入值
-        simpleMDE_Directory:'',                         // 目录的富文本
-        simpleMDE_Content:'',                           // 内容的富文本
+        divIndustryModal:false,                                       // 行业分类弹出框
+        hyflArray: JSON.parse(localStorage.hyflArray),             // 行业分类JSON 
         iReport:{
+          id:null,
           title:'',
-          subTitle:'',
+          category:null,
           fileName:'',
-          bgfl:bgfl,
+          filePath:'',
+          filePage:null,
+          previewPage:null,
+          thumb:'',
           hyfl:[],
-          keywordTags:[],
-          level:''
+          description:'',
+          createBy:''
         },
         ruleValidate:{
           title:[{ required:true,message:'请填写标题',trigger:'blur' }],
-          hyfl:[{ required:true,message:'请添加行业分类' }],
-          keyword:[{ required:true,message:'请添加关键词' }],
-          bgfl:[{ required:true,message:'请选择报告分类' }],
-          publishDate:[{ required:true,message:'请选择发布日期' }]
-        }
+          category:[{ required:true,message:'请选择分类' }]
+        },
+        props:{
+          label:'title',
+          children:'children'
+        },
+        lstCategory:[{ id:1,name:'样本' },{ id:2,name:'大数据分析报告' },{ id:3,name:'深度研究报告' },{ id:4,name:'专题报告' }]
     }
   },
-  components:{ bgfl,hyfl },
+  created(){
+   if(!util.isNullOrEmpty(this.$route.query.id)){
+      this.iReport.id = this.$route.query.id;
+      this.getReport();
+   }
+  },
   methods:{
+    getReport(){
+      var _params = { id:this.iReport.id };
+      this.$http.get('/Api/DZReport/GetDZReport',{ params:_params }).then(result => {
+          if(result.data.code == util.error) {
+            this.$Model.error({ title:'错误',content:result.data.msg }); return
+          }
+          let dItem = JSON.parse(result.data.data);
+          this.iReport = { 
+            id:dItem.id,
+            title:dItem.Title,
+            category:dItem.Category,
+            fileName:dItem.FileName,
+            filePath:dItem.FilePath,
+            filePage:dItem.FilePage,
+            previewPage:dItem.PreviewPage,
+            thumb:dItem.Thumb,
+            hyfl:[],
+            description:dItem.Description,
+            createBy:dItem.CreateBy
+          }
+      })
+    },
     addReport(){
       this.$refs['iReport'].validate(valid=>{
           if(!valid){
@@ -182,41 +202,38 @@ export default {
     addCategoryTag(){
       this.divIndustryModal = true;
     },
-    showInputTag(){
-      this.inputVisible = true;
-      this.$nextTick(()=>{
-        this.$refs.saveInputTag.$refs.input.focus();
+    handleBefore(file){
+      var formData = new FormData();
+      formData.append('file',file);
+      this.$http.post('/Api/FileUpload/UploadFile',formData).then(result=>{
+        if(result.data.status == 101) { this.$Modal.error({ title :'上传失败', content : result.data.message }); return }
+        if(result.data.status == 0){
+          this.iReport.fileName = result.data.fileName;
+          this.iReport.filePath = result.data.filePath;
+          this.iReport.filePage = result.data.filePage;
+        }
       })
     },
-    addKeywordTag(){
-      let inputValue = this.inputValue;
-      if(inputValue) this.iReport.keywordTags.push(inputValue);
-      this.inputVisible = false;
-      this.inputValue = '';
+    handleFormatError(file){
+      this.$Modal.error({ title:'上传失败',content:'文件格式错误' })
     },
-    delKeywordTag(event,name){
-      const index = this.iReport.keywordTags.indexOf(name);
-      this.iReport.keywordTags.splice(index,1);
+    treeCheck(node,cNodes){
+      let nodeItem = { id:node.id,title:node.title };
+      let idx = this.iReport.hyfl.findIndex(el => el.id == node.id);
+      if(idx == -1){
+        this.iReport.hyfl.push(nodeItem);
+      }else{
+        this.iReport.hyfl.splice(idx,1);
+      }
     },
-    OnSelectChangeTags(){},
-    handleSuccess(){},
-    delIndustry(){},
-    delCategoryTag(){}
+    delSelectedTag(event,name){
+      var checkNodes = this.$refs.treeTags.getCheckedNodes();
+      var node = checkNodes.filter(node => { return node.title == name });
+      var nodes = checkNodes.filter(node => { return node.title != name });
+      this.$refs.treeTags.setCheckedNodes(nodes);
+      this.treeCheck(node[0],nodes)
+    },
 
-  },
-  mounted(){
-    this.simpleMDE_Directory = new SimpleMDE({
-        element: document.getElementById('txt_markdown_directory'),
-        // autoDownloadFontAwesome:false,       // 自动下载FontAwesome,国内下载非常慢，所以要手动安装npm install fontawesome
-        placeholder:'请输入报告目录',
-        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'clean-block', '|', 'link', 'image', 'table', 'horizontal-rule', '|', 'preview']
-    })
-    this.simpleMDE_Content = new SimpleMDE({
-        element: document.getElementById('txt_markdown_content'),
-        // autoDownloadFontAwesome:false,       // 自动下载FontAwesome,国内下载非常慢，所以要手动安装npm install fontawesome
-        placeholder:'请输入报告内容',
-        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'clean-block', '|', 'link', 'image', 'horizontal-rule', '|', 'preview']
-    })
   }
 }
 

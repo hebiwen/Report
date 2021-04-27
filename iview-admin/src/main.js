@@ -6,12 +6,14 @@ import App from './App'
 import { router } from './router/index'
 import {appRouter} from './router/router'
 import store from './store'
-
-import 'iview/dist/styles/iview.css'; 
-
 import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:27298'  // 设置默认api地址可以解决不能调用WEBAPI的问题
-//axios.defaults.baseURL = 'http://localhost:8001'
+import ElementUI from 'element-ui'
+
+import 'iview/dist/styles/iview.css'
+import 'element-ui/lib/theme-chalk/index.css' 
+
+//axios.defaults.baseURL = 'http://localhost:27298'  // 设置默认api地址可以解决不能调用WEBAPI的问题
+axios.defaults.baseURL = 'http://localhost:8001'
 axios.defaults.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
 // axios.defaults.headers['Content-Type'] = 'application/json'
 
@@ -19,6 +21,7 @@ Vue.config.productionTip = false
 Vue.prototype.$http = axios
 
 Vue.use(iView)
+Vue.use(ElementUI)
 
 /* eslint-disable no-new */
 new Vue({
@@ -45,6 +48,4 @@ new Vue({
     console.log("maintagslist:"+tagsList.toString());
     this.$store.commit('setTagsList',tagsList);
   }
-  // components :{App },
-  // template: '<App/>'
 })

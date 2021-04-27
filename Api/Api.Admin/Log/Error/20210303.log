@@ -1,0 +1,8 @@
+异常时间：2021-03-03 17:00:56,189 [24] 
+异常级别：ERROR 
+异 常  类：logerror [(null)] 
+描      述：未将对象引用设置到对象的实例。 
+---------------------------- 
+System.NullReferenceException: 未将对象引用设置到对象的实例。
+   在 Api.Admin.Controllers.ReportController.TextValidation(HttpContext context, List`1& messageList) 位置 D:\Codes\SXD_Admin\Api\Api.Admin\Controllers\ReportController.cs:行号 273
+   在 Api.Admin.Controllers.ReportController.SaveReport() 位置 D:\Codes\SXD_Admin\Api\Api.Admin\Controllers\ReportController.cs:行号 147

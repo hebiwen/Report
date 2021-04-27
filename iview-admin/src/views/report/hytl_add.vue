@@ -43,16 +43,16 @@
                 <p slot="title">
                     <Icon type="paper-airplane"></Icon> 发布
                 </p>
-                <p class="margin-top-10">
+                <p>
                     发布日期:
-                    <DatePicker type="datetime" format="yyyy-MM-dd HH:mm" placeholder="请选择发布日期"></DatePicker>
+                    <DatePicker type="datetime" format="yyyy-MM-dd" placeholder="请选择发布日期"></DatePicker>
                 </p>
                 <p class="margin-top-10">
                     前端显示:
-                    <Switch>
+                    <i-switch>
                     <span slot="open">是</span>
                     <span slot="close">否</span>
-                    </Switch>
+                    </i-switch>
                 </p>
                 <Row class="margin-top-20 publish-button-con">
                     <span class="publish-button"><Button type="primary" @click="addReport()">保存</Button></span>
@@ -83,3 +83,7 @@ export default {
     components:{tplReport }
 }
 </script>
+
+<style>
+.ivu-form-item { margin-bottom: 17px; }
+</style>

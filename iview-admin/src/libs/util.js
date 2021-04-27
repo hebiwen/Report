@@ -5,10 +5,8 @@ import packjson from '../../package.json';
 
 let util = {};
 
-util.infoTitle = '提示'
-util.errorTitle = '错误'
-util.warnTitle = '警告'
-util.confirmTitle = '确认'
+util.error = 0
+util.success = 1
 
 util.title = function (title, vm) {
     let iTitle = '行业报告';
@@ -252,7 +250,7 @@ util.toDefaultPage = function (routers, name, route, next) {
 };
 
 
-util.formatDate = function formatDate(date, fmt) {
+util.formatDate = function (date, fmt) {
     if (typeof date == 'string') {
       return date;
     }
@@ -313,23 +311,44 @@ util.isNullOrEmpty = function(obj){
     }
 }
 
-util.getCategory = async function(type){
-    // let obj = [];
-    // await axios.get('/Api/Report/GetCategory',{ params: { type:type } }).then(result=>{
-    //     if(result.data.code == 0){
-    //         obj = JSON.stringify(result.data.data);
-    //     }
-    // })
-    // return obj;
-
-    try {
-        const result = await axios.get('/Api/Report/GetCategory',{ params:{ type:type } });
-        //return JSON.parse(result.data.data);
-        return "dd";
-    } catch (error) {
-        console.log(error);
-    }
-
+util.mapCategory = function(arr,ct){
+    var hArr = [];
+    arr.forEach(item => {
+        var h = ct.split(',');
+        if(item.children!=null){
+            item.children.map(child => {
+              if(h.includes(child.id.toString())) {
+                hArr.push({ id : child.id, title : child.title })
+              }
+            })
+        } else{
+            if(h.includes(item.id.toString())){
+              hArr.push({ id : item.id, title : item.title }) 
+            }
+        }
+      })
+    return hArr;
 }
+
+util.mapHYFL = function(arr,ct){
+    arr.forEach(item => {
+        var h = ct.split(',');
+        if(item.children!=null){
+            item.children.map(child => {
+              if(h.includes(child.id.toString())) {
+                child.select = true
+                child.checked = true
+              }
+            })
+        } else{
+            if(h.includes(item.id.toString())){
+              item.select = true
+              item.checked = true
+            }
+        }
+    })
+    return arr;
+}
+
 
 export default util;

@@ -31,6 +31,9 @@ namespace Api.Model
         public DbSet<RP_Directory> Directory { get; set; }
 
         public DbSet<RP_Category> Category { get; set; }
+
+        public DbSet<RP_DZReport> DZReport { get; set; }
+
         #endregion
 
         #region VEntities

@@ -1,4 +1,3 @@
-D:\Codes\SXD_Admin\Api\Api.Admin\bin\ApplicationInsights.config
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\roslyn\csc.exe
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
@@ -51,3 +50,21 @@ D:\Codes\SXD_Admin\Api\Api.Admin\bin\PagedList.dll
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\PagedList.xml
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\log4net.dll
 D:\Codes\SXD_Admin\Api\Api.Admin\bin\log4net.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\Antlr3.Runtime.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\Microsoft.Web.Infrastructure.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Helpers.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Mvc.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Optimization.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Razor.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.WebPages.Deployment.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.WebPages.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.WebPages.Razor.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\WebGrease.dll
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\Antlr3.Runtime.pdb
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Helpers.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Mvc.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Optimization.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.Razor.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.WebPages.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.WebPages.Deployment.xml
+D:\Codes\SXD_Admin\Api\Api.Admin\bin\System.Web.WebPages.Razor.xml

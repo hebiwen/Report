@@ -27,6 +27,9 @@ namespace Api.Admin.Controllers
             ResultData result = new ResultData();
             try
             {
+                if (!string.IsNullOrEmpty(HttpContext.Current.Request["pageSize"]))
+                    pageSize = int.Parse(HttpContext.Current.Request["pageSize"]);
+
                 List<CodeValueItem> lstStatus = CodeValueItem.lstStatus;
                 List<CodeValueItem> lstBgfl = CodeValueItem.lstBgfl;
 
@@ -35,7 +38,7 @@ namespace Api.Admin.Controllers
                              join e in lstBgfl on c.bgfl equals e.Code
                              where c.Status.HasValue && !string.IsNullOrEmpty(c.Title)
                              orderby c.PublishDate descending
-                             select new 
+                             select new
                              {
                                  id = c.id,
                                  title = c.Title,
@@ -44,12 +47,64 @@ namespace Api.Admin.Controllers
                                  status = c.Status,
                                  statusName = d.Value,
                                  publishDate = c.PublishDate.Value.ToString("yyyy-MM-dd")
-                             }).AsEnumerable();
-                var dItems = query.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();    
+                             });
+                var dItems = query.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
 
                 result = new ResultData()
                 {
+                    code = (int)ResultCode.Successed,
                     pageIndex = pageIndex,
+                    total = query.Count(),
+                    data = JsonConvert.SerializeObject(dItems)
+                };
+            }
+            catch (Exception ex)
+            {
+                result = new ResultData() { code = (int)ResultCode.Faild, msg = ex.Message };
+                LogClient.WriteLog(ex.Message, ex);
+            }
+            return Json(result);
+        }
+
+        /// <summary>
+        /// 获取所有报告
+        /// </summary>
+        /// <param name="title">标题</param>
+        /// <returns></returns>
+        [HttpGet]
+        public IHttpActionResult GetAllReport(string category, string level, int pageIndex, int pageSize = 20)
+        {
+            ResultData result = new ResultData();
+            try
+            {
+                List<CodeValueItem> lstBgfl = CodeValueItem.lstBgfl;
+                // 终审通过的报告列表
+                var query = (from c in db.Report.AsEnumerable()
+                             join e in lstBgfl on c.bgfl equals e.Code
+                             where c.Status.HasValue && c.Status == (int)ReportStatus.LastAuditSuccess && !string.IsNullOrEmpty(c.Title)
+                             orderby c.PublishDate descending
+                             select new
+                             {
+                                 id = c.id,
+                                 title = c.Title,
+                                 bgfl = c.bgfl,
+                                 bgflName = e.Value,
+                                 level = c.Level,
+                                 publishDate = c.PublishDate.Value.ToString("yyyy-MM-dd")
+                             }).AsEnumerable();
+                if (!string.IsNullOrEmpty(level))
+                {
+                    query = query.Where(el => el.level.ToString() == level);
+                }
+                if (!string.IsNullOrEmpty(category))
+                {
+                    query = query.Where(el => el.bgfl.ToString() == category);
+                }
+                var dItems = query.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
+
+                result = new ResultData()
+                {
+                    code = (int)ResultCode.Successed,
                     total = query.Count(),
                     data = JsonConvert.SerializeObject(dItems)
                 };
@@ -77,7 +132,7 @@ namespace Api.Admin.Controllers
                 if (report == null) return ErrorResult(ResultCode.Faild, "报告不存在.");
                 var iResult = new { data = report, statusName = ApiEnum.TransferReportStatus(report.Status) };
 
-                result = new ResultData() { code = (int)ResultCode.Successed, data = JsonConvert.SerializeObject(iResult) };
+                result = new ResultData { code = (int)ResultCode.Successed, data = JsonConvert.SerializeObject(iResult) };
             }
             catch (Exception ex)
             {
@@ -108,15 +163,18 @@ namespace Api.Admin.Controllers
                 {
                     report.VerifyFirstDate = DateTime.Now;
                 }
-                if(status == 3 || status == 4)  {
+                if (status == 3 || status == 4)
+                {
                     report.VerifyLastDate = DateTime.Now;
                 }
-                
+
                 db.Entry(report).State = System.Data.Entity.EntityState.Modified;
                 int res = db.SaveChanges();
-                if (res > 0) {
+                if (res > 0)
+                {
                     var iResult = new { data = report, statusName = ApiEnum.TransferReportStatus(report.Status) };
-                    result = new ResultData {
+                    result = new ResultData
+                    {
                         code = (int)ResultCode.Successed,
                         msg = ApiEnum.TransferResultCode(ResultCode.Successed),
                         data = JsonConvert.SerializeObject(iResult)
@@ -174,12 +232,31 @@ namespace Api.Admin.Controllers
 
         public void EditReport(HttpContext context)
         {
-            string title = context.Request["title"];
-            string id = context.Request["id"];
-            var report = db.resource_info.FirstOrDefault(c => string.Compare(c.rec_id.ToString(), id) == 0);
+            var report = db.Report.FirstOrDefault(c => string.Compare(c.id.ToString(), context.Request["id"]) == 0);
             if (report != null)
             {
-                report.x_title = title;
+                report.Title = context.Request["title"];
+                report.SubTitle = context.Request["subTitle"];
+                report.KeyWords = context.Request["keyWords"];
+                report.Abstract = context.Request["abstract"];
+                report.Directory = context.Request["directory"];
+                report.Content = context.Request["content"];
+                report.FileName = context.Request["fileName"];
+                report.FilePath = context.Request["filePath"];
+                report.FilePage = ConvertInt32(context.Request["filePage"]);
+                report.bgfl = ConvertInt32(context.Request["bgfl"]);
+                report.zdgzfl = context.Request["zdgzfl"];
+                report.ztfl = context.Request["ztfl"];
+                report.hyfl = context.Request["hyfl"];
+                report.Level = ConvertInt32(context.Request["level"]);
+                report.Author = context.Request["author"];
+                report.Company = context.Request["company"];
+                report.Source = context.Request["source"];
+                report.Language = context.Request["language"];
+                report.Country = context.Request["country"];
+                report.Area = context.Request["area"];
+                report.IsMain = ConvertBoolen(context.Request["isMain"]);
+                report.PublishDate = ConvertDateTime(context.Request["publishDate"]);
 
                 db.Entry(report).State = System.Data.Entity.EntityState.Modified;
             }
@@ -188,42 +265,36 @@ namespace Api.Admin.Controllers
 
         public void CreateReport(HttpContext context)
         {
-            try
+            RP_Report report = new RP_Report()
             {
-                RP_Report report = new RP_Report(){
-                    Title = context.Request["title"],
-                    SubTitle = context.Request["subTitle"],
-                    bgfl = Helper.ConvertInt32(context.Request["bgfl"]),
-                    ztfl = context.Request["ztfl"],
-                    KeyWords = context.Request["keyword"],
-                    Abstract = context.Request["abstract"],
-                    Directory = context.Request["directory"],
-                    Content = context.Request["content"],
-                    Status = (int)ReportStatus.NotAudit,
-                    FileName = context.Request["fileName"],
-                    FilePath = context.Request["filePath"],
-                    FilePage = Helper.ConvertInt32(context.Request["filePage"]),
-                    zdgzfl = context.Request["zdgz"],
-                    hyfl = context.Request["hyfl"],
-                    Level = Helper.ConvertInt32(context.Request["level"]),
-                    Author = context.Request["author"],
-                    Company = context.Request["company"],
-                    Source = context.Request["source"],
-                    Language = context.Request["language"],
-                    Country = context.Request["country"],
-                    Area = context.Request["area"],
-                    IsMain = Helper.ConvertBoolen(context.Request["zdbg"]),
-                    PublishDate = Helper.ConvertDateTime(context.Request["publishDate"]),
-                    CreateBy = "Session",
-                    CreateDate = DateTime.Now,
-                };
+                Title = context.Request["title"],
+                SubTitle = context.Request["subTitle"],
+                bgfl = ConvertInt32(context.Request["bgfl"]),
+                ztfl = context.Request["ztfl"],
+                KeyWords = context.Request["keyword"],
+                Abstract = context.Request["abstract"],
+                Directory = context.Request["directory"],
+                Content = context.Request["content"],
+                Status = (int)ReportStatus.NotAudit,
+                FileName = context.Request["fileName"],
+                FilePath = context.Request["filePath"],
+                FilePage = ConvertInt32(context.Request["filePage"]),
+                zdgzfl = context.Request["zdgz"],
+                hyfl = context.Request["hyfl"],
+                Level = ConvertInt32(context.Request["level"]),
+                Author = context.Request["author"],
+                Company = context.Request["company"],
+                Source = context.Request["source"],
+                Language = context.Request["language"],
+                Country = context.Request["country"],
+                Area = context.Request["area"],
+                IsMain = ConvertBoolen(context.Request["zdbg"]),
+                PublishDate = ConvertDateTime(context.Request["publishDate"]),
+                CreateBy = "Session",
+                CreateDate = DateTime.Now,
+            };
 
-                db.Report.Add(report);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            db.Report.Add(report);
         }
 
         /// <summary>
@@ -240,11 +311,12 @@ namespace Api.Admin.Controllers
                 if (string.IsNullOrEmpty(ids)) return ErrorResult(ResultCode.Faild, "参数值为空，请刷新后重试.");
                 var arrIds = ids.Split(',').Where(en => !string.IsNullOrEmpty(en));
                 var reports = db.resource_info.Where(en => arrIds.Contains(en.rec_id.ToString()));
-                if (reports.Count()==0) return ErrorResult(ResultCode.Faild, "报告不存在，请刷新后重试.");
+                if (reports.Count() == 0) return ErrorResult(ResultCode.Faild, "报告不存在，请刷新后重试.");
 
                 db.resource_info.RemoveRange(reports);
                 int res = db.SaveChanges();
-                if (res > 0) {
+                if (res > 0)
+                {
                     result = new ResultData() { code = (int)ResultCode.Successed, msg = ApiEnum.TransferResultCode(ResultCode.Successed) };
                 }
             }
@@ -303,27 +375,30 @@ namespace Api.Admin.Controllers
             ResultData result = new ResultData();
             try
             {
-                var lstCategory = db.Category.Where(en => en.type == type && en.parentId == null).OrderBy(en => en.sort).ToList();
+                var lstCategory = db.Category.Where(en => en.type == type && en.parentId == null).OrderBy(en => en.sort.Trim()).ToList();
                 if (lstCategory.Count == 0) return ErrorResult(ResultCode.Successed, "暂无数据.");
 
                 List<CategoryTree> lstCategoryTree = new List<CategoryTree>();
-                lstCategory.ForEach(item => {
+                lstCategory.ForEach(item =>
+                {
                     var child = new CategoryTree();
                     child.id = item.id;
                     child.title = item.title;
                     child.parentId = item.parentId;
                     child.parentName = item.parentName;
                     child.sort = item.sort;
+                    child.select = string.Empty;
                     var childCategory = GetChildCategory(child, item.id);
                     if (childCategory == null)
                     {
                         lstCategoryTree.Add(child);
                     }
-                    else {
+                    else
+                    {
                         lstCategoryTree.Add(childCategory);
                     }
                 });
-
+                result.code = (int)ResultCode.Successed;
                 result.data = JsonConvert.SerializeObject(lstCategoryTree);
             }
             catch (Exception ex)
@@ -333,24 +408,26 @@ namespace Api.Admin.Controllers
             return Json(result);
         }
 
-        public CategoryTree GetChildCategory(CategoryTree category,int? parentId)
+        public CategoryTree GetChildCategory(CategoryTree category, int? parentId)
         {
             var childCategory = db.Category.Where(en => en.parentId == parentId).OrderBy(en => en.sort).ToList();
             if (childCategory.Count == 0) return null;
             List<CategoryTree> lstCategory = new List<CategoryTree>();
             childCategory.ForEach(child =>
             {
-                var nCategory = new CategoryTree() {
+                var nCategory = new CategoryTree()
+                {
                     id = child.id,
                     title = child.title,
                     parentId = child.parentId,
                     parentName = child.parentName,
-                    sort = child.sort
+                    sort = child.sort,
+                    select = string.Empty
                 };
                 GetChildCategory(nCategory, child.id);
                 lstCategory.Add(nCategory);
             });
-            if(lstCategory != null) category.children = lstCategory;
+            if (lstCategory != null) category.children = lstCategory;
             return category;
         }
 
@@ -463,6 +540,7 @@ namespace Api.Admin.Controllers
         public int? parentId { get; set; }
         public string parentName { get; set; }
         public string sort { get; set; }
+        public string select { get; set; }
         /// <summary>
         /// 子节点
         /// </summary>

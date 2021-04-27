@@ -8,7 +8,7 @@
         <p slot="title">
             <Icon type="pinpoint"></Icon> 行业报告题录              
         </p>
-        <Form label-width="80">
+        <Form :label-width="80">
             <Row>
             <Col span="8">
                 <FormItem label="行业分类:">
@@ -33,7 +33,7 @@
         </Row>
     </Card>
 
-    <Modal v-model="divPreviewModal" title="预览" width="800">
+    <Modal v-model="divPreviewModal" title="预览" width="1000">
       <tlPreview :id="id"></tlPreview>
     </Modal>
 
@@ -42,6 +42,7 @@
 
 <script>
 import tlPreview from './hytl_preview';
+import util from '../../libs/util';
 
 const previewButton = (_this,h,params) => {
     return h('Button', {
@@ -55,7 +56,7 @@ const editButton = (_this,h,params) => {
     return h('Button', {
         props: { type:'primary',size:'small'},
         style: { marginRight:'5px' },
-        on:{ 'click':()=>{_this.$router.push({ name:'hytlAdd',query:{ id:params.row.id}})} }
+        on:{ 'click':()=>{ _this.$router.push({ name:'hytlEdit',query:{ id:params.row.id}})} }
     }, '编辑');
 };
 
@@ -71,7 +72,7 @@ const deleteButton = (_this,h,params) => {
 };
 
 export default {
-    name:'hytl',
+    name:'hytlList',
     data(){
         return {
             id:null,
@@ -92,9 +93,9 @@ export default {
                 }
             },
             { key:'title',title:'题名',align:'center'},
-            { key:'hyfl',title:'行业分类',align:'center' },
-            { key:'publishDate',title:'发布日期',align:'center' },
-            { title:'操作', align:'center', width:200, render:(h,params) => {
+            { key:'hyfl',title:'行业分类',width:120, align:'center' },
+            { key:'publishDate',title:'发布日期',width:120, align:'center' },
+            { title:'操作', align:'center', width:180, render:(h,params) => {
                     let children = [previewButton(this,h,params),editButton(this,h,params),deleteButton(this,h,params)];
                     return h('div',children);
                 }
@@ -103,30 +104,31 @@ export default {
     },
     components:{ tlPreview },
     mounted(){
-        this.getDirectory();
+        this.getDirectory(this.pageIndex);
     },
     methods:{
-        getDirectory(){
-            var params = {
-                pageIndex :1
-            }
+        getDirectory(pageIndex){
+            var params = { pageIndex : pageIndex }
             this.$http.get('/Api/Directory/GetPageDirectory',{ params : params }).then(result => {
-                if(result.data.code != 0) return;
+                if(result.data.code == util.error) return;
                 let dItem = JSON.parse(result.data.data)
                 this.tlReport = dItem;
                 this.total = result.data.total;
             })
         },
-        showPreviewModal(id){
-            this.divPreviewModal = true;
-            this.id = id;
+
+        changePage(index){
+            this.getDirectory(index);
         },
+
         doSelect(selection,row){
             this.selectedIds.add(row.id);
         },
+
         doCancel(selection,row){
             this.selectedIds.delete(row.id);
         },
+
         doSelectAll(selection){
             if(selection && selection.length == 0 ){
                 var dItems = this.$refs.selection.data;
@@ -141,8 +143,13 @@ export default {
                 })
             }
         },
+
         sendDirectory(){
             console.log(this.selectedIds);
+        },
+        showPreviewModal(id){
+            this.divPreviewModal = true;
+            this.id = id;
         }
         
     }

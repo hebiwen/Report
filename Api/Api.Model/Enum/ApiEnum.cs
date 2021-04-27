@@ -64,6 +64,35 @@ namespace Api.Model
         }
 
         /// <summary>
+        /// 转换定制报告类别
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static string TransferDZCategory(int? type)
+        {
+            string result = string.Empty;
+            switch (type)
+            {
+                case (int)DZCategory.Sample:
+                    result = "样本";
+                    break;
+                case (int)DZCategory.BigData:
+                    result = "大数据分析报告";
+                    break;
+                case (int)DZCategory.Deep:
+                    result = "深度研究报告";
+                    break;
+                case (int)DZCategory.Subject:
+                    result = "专题报告";
+                    break;
+                default:
+                    result = null;
+                    break;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 转换报告级别
         /// </summary>
         /// <param name="level"></param>
@@ -85,12 +114,18 @@ namespace Api.Model
 
     }
 
+    /// <summary>
+    /// 返回结果(成功：1，失败：0)
+    /// </summary>
     public enum ResultCode
     {
         Successed = 1,
         Faild = 0
     }
 
+    /// <summary>
+    /// 行业报告状态
+    /// </summary>
     public enum ReportStatus
     {
         NotAudit = 0,
@@ -112,6 +147,9 @@ namespace Api.Model
         Decimal
     }
 
+    /// <summary>
+    /// 行业报告级别
+    /// </summary>
     public enum ReportLevel
     {
         Level1 = 1,
@@ -119,6 +157,9 @@ namespace Api.Model
         Level3 = 3
     }
 
+    /// <summary>
+    /// 分类
+    /// </summary>
     public enum Category
     {
         BGFL = 1,
@@ -126,5 +167,14 @@ namespace Api.Model
         ZTFL = 3
     }
 
-
+    /// <summary>
+    /// 定制报告分类
+    /// </summary>
+    public enum DZCategory
+    {
+        Sample = 1,
+        BigData = 2,
+        Deep = 3,
+        Subject = 4
+    }
 }

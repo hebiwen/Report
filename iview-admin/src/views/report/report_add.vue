@@ -4,6 +4,7 @@
 
     .input-tag{ width: 80px; margin-left: 0; }
     .CodeMirror, .CodeMirror-scroll { min-height: 200px; }
+    .ivu-form-item-content .ivu-btn {margin:0 5px;}
 
 </style>
 
@@ -28,8 +29,11 @@
             <Col span="12">
                 <FormItem label="报告分类:" prop="bgfl">
                 <Select v-model="iReport.bgfl">
-                <OptionGroup v-for="(item,index) in bgflArray" :key="index" :label="item.parent">
-                    <Option v-for="(dItem,dIndex) in item.children" :value="dItem.value" :key="dIndex">{{ dItem.label }}</Option>
+                <OptionGroup v-if="item.children != null" v-for="(item,index) in bgflArray" :key="index" :label="item.title">
+                    <Option v-for="(dItem,dIndex) in item.children" :value="dItem.id" :key="dIndex">{{ dItem.title }}</Option>
+                </OptionGroup>
+                <OptionGroup label="其它">
+                  <Option v-if="item.children==null" v-for="(item,index) in bgflArray" :key="index" :value="item.id">{{item.title}}</Option>
                 </OptionGroup>
                 </Select>
                 </FormItem>
@@ -37,10 +41,23 @@
             <Col span="12">
                 <FormItem label="中图分类:">
                     <Select v-model="iReport.ztfl">
-                      <Option v-for="item in ztflArray" :key="item.id" :value="item.id">{{ item.title }}</Option>
+                      <Option v-for="(item,index) in ztflArray" :key="index" :value="item.id">{{ item.title }}</Option>
                     </Select>
                 </FormItem>
             </Col>
+        </Row>
+
+        <Row v-if="isEdit" >
+          <Col span="12">
+          <FormItem label="审核状态:">
+            <Tag color="blue">{{ iReport.statusName }}</Tag>
+            <Button type="primary" v-if="iReport.status <= 1" size="small" @click="verifyStatus()">{{ isAudit?'关闭':'审核' }}</Button>
+            <Button type="success" size="small" v-if="iReport.status == 0" v-show="isAudit" @click="doAudit(1)" >初审通过</Button>
+            <Button type="error" size="small" v-if="iReport.status == 0" v-show="isAudit" @click="doAudit(2)" >初审不通过</Button>
+            <Button type="success" size="small" v-if="iReport.status == 1" v-show="isAudit" @click="doAudit(3)" >终审通过</Button>
+            <Button type="error" size="small" v-if="iReport.status == 1" v-show="isAudit" @click="doAudit(4)">终审不通过</Button>
+          </FormItem>
+          </Col>
         </Row>
 
         <Row>
@@ -56,10 +73,10 @@
             </Col>
             <Col span="12">
             <FormItem label="重点报告:">
-                <Switch v-model="iReport.zdbg">
+                <i-switch v-model="iReport.zdbg">
                     <span slot="open">是</span>
                     <span slot="close">否</span>
-                </Switch>
+                </i-switch>
             </FormItem>
             </Col>
         </Row>
@@ -90,7 +107,7 @@
           </Col>
           <Col span="5">
             <FormItem label="报告页数:">
-              <Input v-model="iReport.filePage" placeholder="文件上传完成后自动获取页数" readonly></Input>
+              <Input v-model="iReport.filePage" placeholder="上传完成后自动获取页数" readonly></Input>
             </FormItem>
           </Col>
         </Row>
@@ -181,17 +198,18 @@
     </Form>
     </Card>
 
-    <Modal v-model="divIndustryModal" title="行业分类" width="600" ok-text="确认" >
+    <Modal v-model="divIndustryModal" title="行业分类" width="800" ok-text="确认" >
       <Form ref="formInline"  :label-width="80" inline>
         <Row>
-            <Col span="6">
-                <Tree :data="hyflTree" @on-select-change="OnSelectChangeTags" ref="treeTags" show-checkbox multiple ></Tree>
+            <Col span="10">
+                <!-- <Tree :data="hyflArray" @on-select-change="onSelectNode" @on-check-change="onSelectNode" ref="treeTags" show-checkbox multiple ></Tree> -->
+                <el-tree :data="hyflArray" :props="props" show-checkbox highlight-current node-key="id" ref="treeTags" @check="treeCheck"></el-tree>
             </Col>
             <Col span="2"></Col>
-            <Col span="16">
+            <Col span="12">
                 <FormItem label="已选行业:">
                     <div style="border:1px solid #ddd;width:320px;min-height:30px;">
-                        <Tag v-if="iReport.hyfl.length > 0" v-for="item in iReport.hyfl" :key="item.id" :name="item.title" closable @on-close="delSelectedTag" type="dot" color="success" >{{ item.title }}</Tag>
+                        <Tag v-if="iReport.hyfl.length > 0" v-for="item,index in iReport.hyfl" :key="index" :name="item.title" closable @on-close="delSelectedTag" type="dot" color="success" >{{ item.title }}</Tag>
                     </div>
                 </FormItem>
             </Col>
@@ -205,10 +223,6 @@
 
 import util from '@/libs/util'
 import SimpleMDE from 'simplemde'
-import bgfl from './dict/bgfl'
-import hyfl from './dict/hyfl'
-import ztfl from './dict/ztfl'
-
 export default {
   name:'reportAdd',
   data () {
@@ -223,15 +237,18 @@ export default {
       }
     }
     return {
-        divIndustryModal:false,                         // 行业分类弹出框
-        bgflArray:bgfl,                                 // 报告分类JSON
-        hyflTree:hyfl,                                  // 行业分类JSON
-        ztflArray:ztfl,                                 // 中图分类JSON
-        inputVisible:false,                             // 关键词的输入框默认隐藏
-        inputValue:'',                                  // 关键词的输入值
-        simpleMDE_Directory:'',                         // 目录的富文本
-        simpleMDE_Content:'',                           // 内容的富文本
+        isEdit:false,                                    // 是否编辑
+        isAudit:false,                                   // 是否显示审核通过/不通过
+        divIndustryModal:false,                          // 行业分类弹出框
+        bgflArray: JSON.parse(localStorage.bgflArray),   // 报告分类JSON
+        hyflArray: JSON.parse(localStorage.hyflArray),   // 行业分类JSON
+        ztflArray: JSON.parse(localStorage.ztflArray),   // 中图分类JSON
+        inputVisible:false,                              // 关键词的输入框默认隐藏
+        inputValue:'',                                   // 关键词的输入值
+        simpleMDE_Directory:'',                          // 目录的富文本
+        simpleMDE_Content:'',                            // 内容的富文本
         iReport:{
+          id:null,
           title:'',
           subTitle:'',
           fileName:'',
@@ -239,7 +256,7 @@ export default {
           filePage:null,
           bgfl:'',
           hyfl:[],
-          ztfl:'',
+          ztfl:null,
           keywordTags:[],
           level:'',
           publishDate: new Date(),
@@ -254,20 +271,62 @@ export default {
           abstract:''
         },
         ruleValidate:{
-          // title:[
-          //   { required:true,message:'请填写标题',trigger:'blur' },
-          //   { type:'string',min:1,message:'最小长度为1',trigger:'blur' }
-          // ],
-          title:[{ validator:checkTitle,trigger:'blur' }],
+          // title:[{ required:true,message:'请填写标题',trigger:'blur' },{ type:'string',min:1,message:'最小长度为1',trigger:'blur' }],
+          title:[{ required:true,validator:checkTitle,trigger:'blur' }],
           hyfl:[{ required:true,message:'请添加行业分类' }],
           keywordTags:[{ required:true,message:'请添加关键词' }],
           bgfl:[{ required:true,message:'请选择报告分类' }],
           publishDate:[{ required:true,message:'请选择发布日期' }]
+        },
+        props:{
+          label:'title',
+          children:'children'
         }
     }
   },
-  components:{ bgfl,hyfl,ztfl },
+  created(){
+    if(!util.isNullOrEmpty(this.$route.query.id)){
+      this.iReport.id = this.$route.query.id;
+      this.isEdit = true;
+      this.getReport();
+    }
+  },
   methods:{
+    getReport(){
+        this.$http.get('/Api/Report/GetReport',{ params:{ id : this.iReport.id } }).then(result => {
+            if(result.data.code == 0) {
+                this.$Modal.error({ title:'提示', content:result.data.msg,duration:3});
+                return;
+            }
+            let dItem = JSON.parse(result.data.data);
+            this.iReport = {
+                title: dItem.data.Title,
+                subTitle: dItem.data.SubTitle,
+                bgfl: dItem.data.bgfl,
+                status:dItem.data.Status,
+                statusName: dItem.statusName,
+                ztfl:dItem.data.ztfl,
+                fileName:dItem.data.FileName,
+                filePath:dItem.data.FilePath,
+                filePage:dItem.data.FilePage,
+                keywordTags:dItem.data.KeyWords.split(','),
+                level:dItem.data.Level,
+                publishDate: dItem.data.PublishDate,
+                zdgz:dItem.data.zdgzfl,
+                zdbg:dItem.data.IsMain == 1 ? true : false,
+                author:dItem.data.Author,
+                company:dItem.data.Company,
+                language:dItem.data.Language,
+                source:dItem.data.Source,
+                country:dItem.data.Country,
+                area:dItem.data.Area,
+                abstract:dItem.data.Abstract,
+            }
+            this.iReport.hyfl = util.mapCategory(this.hyflArray,dItem.data.hyfl);
+            this.simpleMDE_Directory.value(dItem.data.Directory);
+            this.simpleMDE_Content.value(dItem.data.Content);
+        })
+    },
     resetReport(){
       this.$refs['iReport'].resetFields();
     },
@@ -286,9 +345,7 @@ export default {
         query.append('ztfl',this.iReport.ztfl);
         query.append('zdgz',this.iReport.zdgz);
         query.append('zdbg',this.iReport.zdbg);
-        let _hyfl = [];
-        this.iReport.hyfl.forEach(item =>{ _hyfl.push(item.id) });
-        query.append('hyfl',_hyfl.toString());
+        query.append('hyfl',this.iReport.hyfl.map(item => item.id).toString());
         query.append('keyword',this.iReport.keywordTags.toString());
         query.append('filePage',this.iReport.filePage);
         query.append('filePath',this.iReport.filePath);
@@ -307,14 +364,13 @@ export default {
         console.log("query:" + JSON.stringify(query));
         this.$http.post('/Api/Report/SaveReport',query).then(result => {
           let msg = { title:'提示', content:result.data.msg }
-            if(result.data.code == 101){
+            if(result.data.code == util.error){
                 this.$Modal.error(msg);
                 return;
             }
             this.$Modal.success(msg);
             this.$refs['iReport'].resetFields();
         })
-
       })
     },
     addCategoryTag(){
@@ -351,23 +407,55 @@ export default {
     handleFormatError(file){
       this.$Modal.error({ title:'上传失败',content:'文件格式错误' })
     },
-    OnSelectChangeTags(node){
-      let itemNode = node[node.length-1];
-      console.log("node:" + itemNode);
-      let nodeItem = { id:itemNode.id,title:itemNode.title }
+    checkChange(node,checked,indeter){
+      let nodeItem = { id:node.id,title:node.title }
       // 点击选中时添加分类，再次点击时移除该分类
-      if(itemNode.selected){
+      if(checked){
         this.iReport.hyfl.push(nodeItem);
       }else{
-        this.iReport.hyfl.filter(item=>item.id != nodeItem.id);
+        let idx = this.iReport.hyfl.findIndex(el => el.id == node.id);
+        this.iReport.hyfl.splice(idx,1);
+        if(indeter) this.$refs.treeTags.setChecked(node,false);
+      }
+    },
+    treeCheck(node,cNodes){
+      let nodeItem = { id:node.id,title:node.title };
+      let idx = this.iReport.hyfl.findIndex(el => el.id == node.id);
+      if(idx == -1){
+        this.iReport.hyfl.push(nodeItem);
+      }else{
+        this.iReport.hyfl.splice(idx,1);
       }
     },
     delSelectedTag(event,name){
-      // 删除分类的同时也要取消Tree中的选中状态
-      this.iReport.hyfl = this.iReport.hyfl.filter( item => item.title != name );
+      var checkNodes = this.$refs.treeTags.getCheckedNodes();
+      var node = checkNodes.filter(node => { return node.title == name });
+      var nodes = checkNodes.filter(node => { return node.title != name });
+      this.$refs.treeTags.setCheckedNodes(nodes);
+      this.treeCheck(node[0],nodes)
     },
     getInput(){
       this.iReport.subTitle = this.iReport.title;
+    },
+    verifyStatus(){
+      this.isAudit = !this.isAudit;
+    },
+    doAudit(status){
+      let query = new URLSearchParams();
+      query.append('status',status);
+      query.append('id',this.editId);
+      this.$http.post('/Api/Report/AuditReport',query).then(result => {
+        debugger
+        if(result.data.code == 101){
+            this.$Modal.error({title:util.errorTitle, content:result.data.msg });
+            return;
+        }
+        let dItem = JSON.parse(result.data.data);
+          this.iReport.statusName = dItem.statusName;
+          this.iReport.status = dItem.data.Status;
+          this.$Modal.success({ title:util.infoTitle, content:result.data.msg,duration:3 });
+      })
+      this.isAudit = false;
     },
   },
   mounted(){
